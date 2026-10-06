@@ -1,10 +1,7 @@
-# untitled
-
-A new Flutter project.
+# Lost-and-Found
+Lost & Found app which allows Ontario Tech University students to post missing items that they would like to retrieve. Other students/users are able to return a lost item to the owner through the app.
 
 ## Getting Started
-
-This project is a starting point for a Flutter application.
 
 A few resources to get you started if this is your first Flutter project:
 
