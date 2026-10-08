@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:untitled/pages/home.dart';
-import 'package:untitled/pages/yourposts.dart';
-import 'package:untitled/pages/request.dart';
-import 'package:untitled/pages/inbox.dart';
-import 'package:untitled/pages/profile.dart';
+import 'package:lost_and_found/pages/home.dart';
+import 'package:lost_and_found/pages/yourposts.dart';
+import 'package:lost_and_found/pages/request.dart';
+import 'package:lost_and_found/pages/inbox.dart';
+import 'package:lost_and_found/pages/profile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

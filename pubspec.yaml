@@ -1,4 +1,4 @@
-name: untitled
+name: lost_and_found
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -88,3 +88,29 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  fonts:
+    - family: HelveticaNeue
+      fonts:
+        - asset: lib/assets/fonts/HelveticaNeueThin.otf
+          weight: 100
+        - asset: lib/assets/fonts/HelveticaNeueThinItalic.otf
+          weight: 100
+          style: italic
+        - asset: lib/assets/fonts/HelveticaNeueRoman.otf
+          weight: 400
+        - asset: lib/assets/fonts/HelveticaNeueMedium.otf
+          weight: 500
+        - asset: lib/assets/fonts/HelveticaNeueMediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: lib/assets/fonts/HelveticaNeueBold.otf
+          weight: 700
+        - asset: lib/assets/fonts/HelveticaNeueBoldItalic.otf
+          weight: 700
+          style: italic
+        - asset: lib/assets/fonts/HelveticaNeueHeavy.otf
+          weight: 800
+        - asset: lib/assets/fonts/HelveticaNeueHeavyItalic.otf
+          weight: 800
+          style: italic
