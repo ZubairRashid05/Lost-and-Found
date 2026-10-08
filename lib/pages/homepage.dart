@@ -13,15 +13,10 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePage();
 }
 
-class _HomePage extends State<HomePage>{
-
+class _HomePage extends State<HomePage> {
   int _selectedPage = 0;
 
-  // var backgroundColour = Colors.red;
-
-
-
-  void _navigateBottomBar(int index){
+  void _navigateBottomBar(int index) {
     setState(() {
       _selectedPage = index;
     });
@@ -32,11 +27,11 @@ class _HomePage extends State<HomePage>{
     const YourPosts(),
     const Request(),
     const Inbox(),
-    const Profile()
+    const Profile(),
   ];
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedPage],
@@ -49,7 +44,7 @@ class _HomePage extends State<HomePage>{
             BoxShadow(
               blurRadius: 20,
               color: Colors.black.withValues(alpha: .1),
-            )
+            ),
           ],
         ),
         child: Padding(

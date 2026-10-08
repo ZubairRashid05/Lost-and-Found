@@ -10,60 +10,6 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Container(
-    //   width: double.infinity,
-    //   padding: EdgeInsets.all(10),
-    //   decoration: BoxDecoration(
-    //     color: Colors.lightBlueAccent,
-    //     borderRadius: BorderRadius.circular(16),
-    //     boxShadow: [
-    //       BoxShadow(
-    //         color: Colors.black.withValues(alpha: 0.4),
-    //         spreadRadius: 2,
-    //         blurRadius: 7,
-    //         offset: const Offset(4, 4),
-    //       ),
-    //     ],
-    //   ),
-    //   child: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       ClipRect(
-    //         child: Image.asset(
-    //           product.imageUrl,
-    //           height: 100,
-    //           width: double.infinity,
-    //           fit: BoxFit.cover,
-    //         ),
-    //       ),
-    //       Padding(
-    //         padding: const EdgeInsets.all(8.0),
-    //         child: Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             Text(
-    //               product.name,
-    //               style: TextStyle(
-    //                 fontFamily: 'HelveticaNeue',
-    //                 fontSize: 18,
-    //                 fontWeight: FontWeight.w800,
-    //               ),
-    //               maxLines: 1,
-    //               overflow: TextOverflow.ellipsis,
-    //             ),
-    //             const SizedBox(height: 4.0),
-    //             Text(
-    //               product.description,
-    //               style: TextStyle(fontSize: 14),
-    //               maxLines: 2,
-    //               overflow: TextOverflow.ellipsis,
-    //             )
-    //           ]
-    //         )
-    //       )
-    //     ],
-    //   ),
-    // );
     return Container(
       height: 180,
       width: double.infinity,

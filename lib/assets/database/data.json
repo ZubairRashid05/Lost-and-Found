@@ -1,0 +1,47 @@
+{
+  "products": [
+    {
+      "name": "Leather Jacket",
+      "description": "black leather jacket",
+      "imageUrl": "lib/assets/images/1.webp",
+      "location": "Science Building",
+      "isFound": false
+    },
+    {
+      "name": "Brown Hat",
+      "description": "Brown hat lost in library",
+      "imageUrl": "lib/assets/images/images.jpeg",
+      "location": "Business Building",
+      "isFound": false
+    },
+    {
+      "name": "Macbook Pro",
+      "description": "Silver macbook pro",
+      "imageUrl": "lib/assets/images/images.jpeg",
+      "location": "N/A",
+      "isFound": false
+    },
+    {
+      "name": "Pencil Case",
+      "description": "Pencil case lost in library. Has Calculator and 3 pens",
+      "imageUrl": "lib/assets/images/images.jpeg",
+      "location": "Science Building",
+      "isFound": false
+    },
+    {
+      "name": "Water Bottle",
+      "description": "14oz black metal water bottle",
+      "imageUrl": "lib/assets/images/images.jpeg",
+      "location": "SIRC",
+      "isFound": false
+    }
+  ],
+
+  "users": [
+    {
+      "email": "admin123@gmail.com",
+      "name": "admin",
+      "password": "password"
+    }
+  ]
+}
