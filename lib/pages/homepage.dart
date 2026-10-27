@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:untitled/pages/home.dart';
-import 'package:untitled/pages/yourposts.dart';
-import 'package:untitled/pages/request.dart';
-import 'package:untitled/pages/inbox.dart';
-import 'package:untitled/pages/profile.dart';
+import 'package:lost_and_found/pages/home.dart';
+import 'package:lost_and_found/pages/yourposts.dart';
+import 'package:lost_and_found/pages/request.dart';
+import 'package:lost_and_found/pages/inbox.dart';
+import 'package:lost_and_found/pages/profile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,15 +13,10 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePage();
 }
 
-class _HomePage extends State<HomePage>{
-
+class _HomePage extends State<HomePage> {
   int _selectedPage = 0;
 
-  // var backgroundColour = Colors.red;
-
-
-
-  void _navigateBottomBar(int index){
+  void _navigateBottomBar(int index) {
     setState(() {
       _selectedPage = index;
     });
@@ -32,11 +27,11 @@ class _HomePage extends State<HomePage>{
     const YourPosts(),
     const Request(),
     const Inbox(),
-    const Profile()
+    const Profile(),
   ];
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedPage],
@@ -49,7 +44,7 @@ class _HomePage extends State<HomePage>{
             BoxShadow(
               blurRadius: 20,
               color: Colors.black.withValues(alpha: .1),
-            )
+            ),
           ],
         ),
         child: Padding(
