@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/pages/login.dart';
 import 'package:lost_and_found/pages/signup.dart';
 import 'package:lost_and_found/pages/yourposts.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/signup': (context) => const SignupPage(),
         '/homepage': (context) => const HomePage(),
-        '/yourposts': (context) => const YourPosts(),
+        // '/yourposts': (context) => const YourPosts(),
       },
     );
   }
