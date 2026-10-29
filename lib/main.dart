@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/pages/login.dart';
 import 'package:lost_and_found/pages/signup.dart';
-import 'package:lost_and_found/pages/yourposts.dart';
 import 'package:lost_and_found/pages/homepage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
