@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lost_and_found/pages/yourposts.dart';
+import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/pages/homepage.dart';
 
 void main() {
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       home: const HomePage(),
       routes: {
         '/homepage': (context) => const HomePage(),
-        '/yourposts': (context) => const YourPosts(),
+        // '/yourposts': (context) => const YourPosts(),
       },
     );
   }
