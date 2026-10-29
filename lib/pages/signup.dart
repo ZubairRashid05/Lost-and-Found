@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 const authTitleStyle = TextStyle(
   fontSize: 20,
@@ -103,21 +104,43 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  void _handleSignup() {
-    if (_usernameController.text.trim().isEmpty ||
-        _emailController.text.trim().isEmpty ||
-        _passwordController.text.trim().isEmpty) {
+  Future<void> _handleSignup() async {
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Account created successfully! Please login.'),
-      ),
-    );
-    Navigator.pop(context);
+
+    try {
+      await Supabase.instance.client.from('users').insert({
+        'username': username,
+        'email': email,
+        'password': password,
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account created successfully! Please login.'),
+        ),
+      );
+      Navigator.pop(context);
+    } on PostgrestException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not create account: ${error.message}')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not create account: $error')),
+      );
+    }
   }
 
   @override
