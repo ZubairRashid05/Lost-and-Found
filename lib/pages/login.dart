@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:lost_and_found/model/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 const authTitleStyle = TextStyle(
-  fontSize: 20,
+  fontSize: 30,
   fontWeight: FontWeight.w700,
   color: Color(0xFF26384C),
 );
@@ -105,26 +103,33 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<List<User>> _loadUsers() async {
-    final response = await rootBundle.loadString(
-      'lib/assets/database/data.json',
-    );
-    final data = jsonDecode(response) as Map<String, dynamic>;
-    return (data['users'] as List<dynamic>)
-        .map((json) => User.fromJson(json))
-        .toList();
-  }
+  final supabase = Supabase.instance.client;
 
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    try {
-      final users = await _loadUsers();
-      final valid = users.any(
-        (user) => user.email == email && user.password == password,
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter your email and password')),
       );
+      return;
+    }
+
+    try {
+      final user = await supabase
+          .from('users')
+          .select('username, email')
+          .eq('email', email)
+          .eq('password', password)
+          .maybeSingle();
+
       if (!mounted) return;
-      if (valid) {
+
+      if (user != null) {
+        final prefs = SharedPreferencesAsync();
+        await prefs.setBool('loggedIn', true);
+        await prefs.setString('email', user['email']);
         Navigator.pushNamedAndRemoveUntil(
           context,
           '/homepage',
@@ -137,9 +142,8 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading user data: $error')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Login failed: $error')));
     }
   }
 

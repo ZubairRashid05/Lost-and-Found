@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'login.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -73,7 +76,19 @@ class _Settings extends State<Settings> {
                             const SizedBox(width: 15),
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async {
+                                  final prefs = SharedPreferencesAsync();
+                                  await prefs.remove('loggedIn');
+                                  await prefs.remove('email');
+
+                                  if (!context.mounted) return;
+
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    '/login',
+                                    (route) => false,
+                                  );
+
                                   const snackBar = SnackBar(
                                     content: Text('Logged out'),
                                   );

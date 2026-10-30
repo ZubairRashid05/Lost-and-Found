@@ -13,17 +13,6 @@ class Home extends StatefulWidget {
   State<Home> createState() => _Home();
 }
 
-Future<List<User>> loadUsers() async {
-  final String response = await rootBundle.loadString(
-    'lib/assets/database/data.json',
-  );
-  final Map<String, dynamic> data = jsonDecode(response);
-  final List<dynamic> userList = data['users'];
-
-  // Convert the raw dynamic list into a typed list of User objects
-  return userList.map((jsonItem) => User.fromJson(jsonItem)).toList();
-}
-
 Future<List<Product>> loadProducts() async {
   final String response = await rootBundle.loadString(
     'lib/assets/database/data.json',
@@ -48,11 +37,9 @@ class _Home extends State<Home> {
 
   Future<void> loadData() async {
     try {
-      final loadedUsers = await loadUsers();
       final loadedProducts = await loadProducts();
 
       setState(() {
-        users = loadedUsers;
         products = loadedProducts;
       });
     } catch (e) {

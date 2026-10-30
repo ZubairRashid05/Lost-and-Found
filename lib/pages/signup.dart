@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const authTitleStyle = TextStyle(
-  fontSize: 20,
+  fontSize: 30,
   fontWeight: FontWeight.w700,
   color: Color(0xFF26384C),
 );
