@@ -117,20 +117,28 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
-      await Supabase.instance.client.from('users').insert({
-        'username': username,
-        'email': email,
-        'password': password,
-      });
+      final response = await Supabase.instance.client.auth.signUp(
+        email: email,
+        password: password,
+        data: {'username': username},
+      );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created successfully! Please login.'),
-        ),
-      );
-      Navigator.pop(context);
-    } on PostgrestException catch (error) {
+      if (response.session != null) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/homepage',
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Check your email to confirm your account.'),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } on AuthException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not create account: ${error.message}')),
