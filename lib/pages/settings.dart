@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'login.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -77,9 +75,7 @@ class _Settings extends State<Settings> {
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  final prefs = SharedPreferencesAsync();
-                                  await prefs.remove('loggedIn');
-                                  await prefs.remove('email');
+                                  await Supabase.instance.client.auth.signOut();
 
                                   if (!context.mounted) return;
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const authTitleStyle = TextStyle(
@@ -117,29 +116,15 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final user = await supabase
-          .from('users')
-          .select('username, email')
-          .eq('email', email)
-          .eq('password', password)
-          .maybeSingle();
+      await supabase.auth.signInWithPassword(email: email, password: password);
 
       if (!mounted) return;
-
-      if (user != null) {
-        final prefs = SharedPreferencesAsync();
-        await prefs.setBool('loggedIn', true);
-        await prefs.setString('email', user['email']);
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/homepage',
-          (route) => false,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email or password')),
-        );
-      }
+      Navigator.pushNamedAndRemoveUntil(context, '/homepage', (route) => false);
+    } on AuthException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login failed: ${error.message}')));
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -167,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 25),
               AuthField(
-                label: 'Email or Username',
+                label: 'Email',
                 hint: 'example@email.com',
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
