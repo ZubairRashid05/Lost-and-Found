@@ -28,6 +28,7 @@ Future<List<Product>> loadProducts() async {
 class _Home extends State<Home> {
   List<User> users = [];
   List<Product> products = [];
+  int _crossAxisCount = 2;
 
   @override
   void initState() {
@@ -47,19 +48,52 @@ class _Home extends State<Home> {
     }
   }
 
+  void updateCrossAxisCount() {
+    if (_crossAxisCount == 3) {
+      setState(() {
+        _crossAxisCount = 1;
+      });
+    } else {
+      setState(() {
+        _crossAxisCount += 1;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Home")),
+      appBar: AppBar(
+        title: const Text("Home"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.view_column),
+            onPressed: () => updateCrossAxisCount(),
+            tooltip: '1 per row',
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(15.0),
-              child: Column(
-                spacing: 15,
-                children: [for (var x in products) ProductCard(product: x)],
+              child: GridView.builder(
+                shrinkWrap: true, // Ensures GridView takes only the height it needs inside SingleChildScrollView
+                physics: const NeverScrollableScrollPhysics(), // Disables GridView's internal scroll (outer SingleChildScrollView handles scrolling)
+                itemCount: products.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _crossAxisCount, // <-- Dynamic crossAxisCount
+                  crossAxisSpacing: 12.0, // Space between columns
+                  mainAxisSpacing: 12.0, // Space between rows
+                  childAspectRatio: _crossAxisCount == 1
+                      ? 2.2
+                      : (_crossAxisCount == 2 ? 0.75 : 0.6),
+                ),
+                itemBuilder: (context, index) {
+                  return ProductCard(product: products[index]);
+                },
               ),
             ),
           ],
