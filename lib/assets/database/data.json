@@ -35,13 +35,5 @@
       "location": "SIRC",
       "isFound": false
     }
-  ],
-
-  "users": [
-    {
-      "email": "admin123@gmail.com",
-      "name": "admin",
-      "password": "password"
-    }
   ]
 }

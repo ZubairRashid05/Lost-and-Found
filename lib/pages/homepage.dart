@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:lost_and_found/pages/home.dart';
-import 'package:lost_and_found/pages/yourposts.dart';
+import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/pages/request.dart';
 import 'package:lost_and_found/pages/inbox.dart';
 import 'package:lost_and_found/pages/profile.dart';
@@ -24,7 +24,6 @@ class _HomePage extends State<HomePage> {
 
   final List<Widget> _pages = [
     const Home(),
-    const YourPosts(),
     const Request(),
     const Inbox(),
     const Profile(),
@@ -59,7 +58,7 @@ class _HomePage extends State<HomePage> {
             onTabChange: _navigateBottomBar,
             tabs: const [
               GButton(icon: Icons.home, text: "Home"),
-              GButton(icon: Icons.dynamic_feed, text: "My Posts"),
+              // GButton(icon: Icons.dynamic_feed, text: "My Posts"),
               GButton(icon: Icons.add_circle_outline),
               GButton(icon: Icons.local_post_office_outlined, text: "Inbox"),
               GButton(icon: Icons.person, text: "Profile"),
