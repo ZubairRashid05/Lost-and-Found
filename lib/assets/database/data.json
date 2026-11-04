@@ -5,7 +5,7 @@
       "description": "black leather jacket",
       "imageUrl": "lib/assets/images/1.webp",
       "location": "Science Building",
-      "isFound": false
+      "isFound": false,
       "category": "Clothing",
       "subcategory": "Jacket",
       "username": "Alex"
@@ -15,7 +15,7 @@
       "description": "Brown hat lost in library",
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "Business Building",
-      "isFound": false
+      "isFound": false,
       "category": "Clothing",
       "subcategory": "Other",
       "username": "Sam"
@@ -25,7 +25,7 @@
       "description": "Silver macbook pro",
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "N/A",
-      "isFound": false
+      "isFound": false,
       "category": "Electronics",
       "subcategory": "Laptop",
       "username": "Jordan"
@@ -35,7 +35,7 @@
       "description": "Pencil case lost in library. Has Calculator and 3 pens",
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "Science Building",
-      "isFound": false
+      "isFound": false,
       "category": "Student Essentials",
       "subcategory": "Other",
       "username": "Taylor"
@@ -45,7 +45,7 @@
       "description": "14oz black metal water bottle",
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "SIRC",
-      "isFound": false
+      "isFound": false,
       "category": "Other",
       "subcategory": "Other",
       "username": "Casey"
