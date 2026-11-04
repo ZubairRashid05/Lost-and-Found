@@ -6,6 +6,9 @@
       "imageUrl": "lib/assets/images/1.webp",
       "location": "Science Building",
       "isFound": false
+      "category": "Clothing",
+      "subcategory": "Jacket",
+      "username": "Alex"
     },
     {
       "name": "Brown Hat",
@@ -13,6 +16,9 @@
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "Business Building",
       "isFound": false
+      "category": "Clothing",
+      "subcategory": "Other",
+      "username": "Sam"
     },
     {
       "name": "Macbook Pro",
@@ -20,6 +26,9 @@
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "N/A",
       "isFound": false
+      "category": "Electronics",
+      "subcategory": "Laptop",
+      "username": "Jordan"
     },
     {
       "name": "Pencil Case",
@@ -27,6 +36,9 @@
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "Science Building",
       "isFound": false
+      "category": "Student Essentials",
+      "subcategory": "Other",
+      "username": "Taylor"
     },
     {
       "name": "Water Bottle",
@@ -34,6 +46,9 @@
       "imageUrl": "lib/assets/images/images.jpeg",
       "location": "SIRC",
       "isFound": false
+      "category": "Other",
+      "subcategory": "Other",
+      "username": "Casey"
     }
   ]
 }

@@ -49,7 +49,7 @@ class _Home extends State<Home> {
   }
 
   void updateCrossAxisCount() {
-    if (_crossAxisCount == 3) {
+    if (_crossAxisCount == 2) {
       setState(() {
         _crossAxisCount = 1;
       });
@@ -181,14 +181,18 @@ class _Home extends State<Home> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.location_on_outlined, size: 20),
+                          const Icon(Icons.account_circle_outlined, size: 20),
                           const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              product.location,
-                              style: const TextStyle(fontSize: 16),
+                          Text(
+                            product.username,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.chat_bubble_outline, size: 20),
+                          const Spacer(),
                           Chip(
                             label: Text(product.isFound ? "Found" : "Lost"),
                             backgroundColor: product.isFound
@@ -198,7 +202,31 @@ class _Home extends State<Home> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const Divider(height: 24),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined, size: 20),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              product.location,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Icon(Icons.category_outlined, size: 20),
+                          const SizedBox(width: 6),
+                          Text(
+                            "${product.category} • ${product.subcategory}",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 24),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
