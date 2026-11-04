@@ -59,7 +59,50 @@ class _Home extends State<Home> {
               padding: const EdgeInsets.all(15.0),
               child: Column(
                 spacing: 15,
-                children: [for (var x in products) ProductCard(product: x)],
+                children: [
+                  for (var x in products)
+                  GestureDetector(
+                      onTap: () => showProductDetails(x),
+                      child: ProductCard(product: x),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  void showProductDetails(Product product) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Image.asset(product.imageUrl, height: 250, fit: BoxFit.cover),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(product.description),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Location: ${product.location}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                ],
               ),
             ),
           ],
