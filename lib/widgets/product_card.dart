@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/product.dart';
 
-import 'dart:io';
 
 class ProductCard extends StatelessWidget {
   final Product product;

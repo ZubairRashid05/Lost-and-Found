@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/widgets/product_card.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -46,6 +47,11 @@ class _Profile extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    final userEmail = currentUser?.email ?? 'No email found';
+    final userUsername = currentUser?.userMetadata?['username'] ?? 'No username found';
+
     return Scaffold(
       appBar: AppBar(title: const Text("Your Profile")),
       body: ListView(
@@ -54,7 +60,7 @@ class _Profile extends State<Profile> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -65,42 +71,53 @@ class _Profile extends State<Profile> {
                   child: Icon(Icons.person, size: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 16),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'User Name',
+                        userUsername,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
                       Text(
-                        'Email@gmail.com',
-                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                        userEmail,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.settings),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const Settings()),
                     );
+                    if (mounted) {
+                      setState(() {});
+                    }
                   },
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Divider(height: 1),
+          Divider(height: 1, color: isDark ? Colors.grey.shade800 : null),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             "Your posts",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black,
+            ),
           ),
           const SizedBox(height: 16),
           SingleChildScrollView(
@@ -135,8 +152,7 @@ class _Profile extends State<Profile> {
                       ),
                     ],
                   ),
-                // for (var x in products) ProductCard(product: x),
-                SizedBox(height: 80),
+                const SizedBox(height: 80),
               ],
             ),
           ),

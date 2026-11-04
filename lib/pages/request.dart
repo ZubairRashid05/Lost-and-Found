@@ -172,6 +172,7 @@ class _Request extends State<Request> {
                           if (value == null) {
                             return 'Please select a category';
                           }
+                          return null;
                         },
 
                         onChanged: (String? value) {
@@ -200,7 +201,7 @@ class _Request extends State<Request> {
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                         ),
-                        value: _selectedSubcategory,
+                        initialValue: _selectedSubcategory,
                         items: (categories[_selectedCategory] ?? []).map((
                           subcategory,
                         ) {
@@ -217,6 +218,7 @@ class _Request extends State<Request> {
                           if (value == null) {
                             return 'Please select a subcategory';
                           }
+                          return null;
                         },
 
                         onChanged: _selectedCategory == null
