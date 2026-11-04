@@ -5,6 +5,8 @@ import 'package:lost_and_found/pages/draft.dart';
 import 'package:lost_and_found/pages/signup.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -21,19 +23,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lost and Found',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        fontFamily: 'HelveticaNeue',
-      ),
-      home: const AuthGate(),
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/signup': (context) => const SignupPage(),
-        '/homepage': (context) => const HomePage(),
-        '/drafts': (context) => const DraftPage(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, currentMode, child) {
+        return MaterialApp(
+          title: 'Lost and Found',
+          debugShowCheckedModeBanner: false,
+          themeMode: currentMode,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+            fontFamily: 'HelveticaNeue',
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+            fontFamily: 'HelveticaNeue',
+          ),
+          home: const AuthGate(),
+          routes: {
+            '/login': (context) => const LoginPage(),
+            '/signup': (context) => const SignupPage(),
+            '/homepage': (context) => const HomePage(),
+            '/drafts': (context) => const DraftPage(),
+          },
+        );
       },
     );
   }

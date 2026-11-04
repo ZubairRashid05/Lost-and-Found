@@ -254,7 +254,7 @@ class _Request extends State<Request> {
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                         ),
-                        value: _selectedSubcategory,
+                        initialValue: _selectedSubcategory,
                         items: (categories[_selectedCategory] ?? []).map((
                           subcategory,
                         ) {

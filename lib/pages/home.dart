@@ -1,10 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:lost_and_found/main.dart';
 import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/model/user.dart';
 import 'package:lost_and_found/widgets/product_card.dart';
-import 'package:flutter/services.dart' show rootBundle;
-
-import 'dart:convert';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -19,7 +19,6 @@ Future<List<Product>> loadProducts() async {
   );
   final Map<String, dynamic> data = jsonDecode(response);
   final List<dynamic> productList = data['products'];
-  ;
 
   // Convert the raw dynamic list into a typed list of User objects
   return productList.map((jsonItem) => Product.fromJson(jsonItem)).toList();
@@ -44,7 +43,7 @@ class _Home extends State<Home> {
         products = loadedProducts;
       });
     } catch (e) {
-      print("Error loading data: $e");
+      debugPrint("Error loading data: $e");
     }
   }
 
@@ -66,6 +65,20 @@ class _Home extends State<Home> {
       appBar: AppBar(
         title: const Text("Home"),
         actions: [
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: themeNotifier,
+            builder: (context, currentMode, child) {
+              final isDark = currentMode == ThemeMode.dark;
+              return IconButton(
+                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                onPressed: () {
+                  themeNotifier.value =
+                      isDark ? ThemeMode.light : ThemeMode.dark;
+                },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.view_column),
             onPressed: () => updateCrossAxisCount(),
