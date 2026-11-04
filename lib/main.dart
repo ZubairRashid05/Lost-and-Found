@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/pages/login.dart';
 import 'package:lost_and_found/pages/homepage.dart';
+import 'package:lost_and_found/pages/draft.dart';
 import 'package:lost_and_found/pages/signup.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
             '/login': (context) => const LoginPage(),
             '/signup': (context) => const SignupPage(),
             '/homepage': (context) => const HomePage(),
+            '/drafts': (context) => const DraftPage(),
           },
         );
       },
