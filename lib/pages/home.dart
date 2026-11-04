@@ -69,7 +69,6 @@ class _Home extends State<Home> {
           IconButton(
             icon: const Icon(Icons.view_column),
             onPressed: () => updateCrossAxisCount(),
-            tooltip: '1 per row',
           ),
         ],
       ),

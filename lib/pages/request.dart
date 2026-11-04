@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/model/draft.dart';
+import 'package:lost_and_found/pages/draft.dart';
 
 import 'dart:io';
 
@@ -12,8 +14,8 @@ class Request extends StatefulWidget {
 }
 
 class _Request extends State<Request> {
-  String? _postName;
-  String? _postDescription;
+  final _postName = TextEditingController();
+  final _postDescription = TextEditingController();
   String? _selectedCategory;
   String? _selectedSubcategory;
   String? _selectedLocation;
@@ -40,6 +42,52 @@ class _Request extends State<Request> {
     'Recreation Centre',
   ];
 
+  @override
+  void dispose() {
+    _postName.dispose();
+    _postDescription.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveDraft() async {
+    final draft = RequestDraft(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: _postName.text.trim(),
+      description: _postDescription.text.trim(),
+      category: _selectedCategory,
+      subcategory: _selectedSubcategory,
+      location: _selectedLocation,
+      imagePath: selectedImage?.path,
+      updatedAt: DateTime.now(),
+    );
+
+    await DraftStorage.save(draft);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Draft saved on this device.')),
+    );
+  }
+
+  Future<void> _openDrafts() async {
+    final draft = await Navigator.push<RequestDraft>(
+      context,
+      MaterialPageRoute(builder: (_) => const DraftPage()),
+    );
+    if (draft == null || !mounted) return;
+
+    setState(() {
+      _postName.text = draft.title;
+      _postDescription.text = draft.description;
+      _selectedCategory = draft.category;
+      _selectedSubcategory = draft.subcategory;
+      _selectedLocation = draft.location;
+      selectedImage =
+          draft.imagePath != null && File(draft.imagePath!).existsSync()
+          ? File(draft.imagePath!)
+          : null;
+    });
+  }
+
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
 
@@ -56,19 +104,30 @@ class _Request extends State<Request> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    _formKey.currentState!.save();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Post created successfully!'),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Post created successfully!')));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Post")),
+      appBar: AppBar(
+        title: const Text("Create Post"),
+        actions: [
+          IconButton(
+            onPressed: _saveDraft,
+            tooltip: 'Save draft',
+            icon: const Icon(Icons.save_outlined),
+          ),
+          IconButton(
+            onPressed: _openDrafts,
+            tooltip: 'Open drafts',
+            icon: const Icon(Icons.drafts_sharp),
+          ),
+        ],
+      ),
 
       body: SingleChildScrollView(
         padding: EdgeInsets.only(left: 20, right: 20, top: 12),
@@ -85,6 +144,7 @@ class _Request extends State<Request> {
               Padding(
                 padding: EdgeInsetsGeometry.only(bottom: 10),
                 child: TextFormField(
+                  controller: _postName,
                   decoration: const InputDecoration(
                     hintText: "What would you like to call this post?",
                     prefixIcon: Icon(Icons.title),
@@ -99,10 +159,6 @@ class _Request extends State<Request> {
                     }
                     return null;
                   },
-
-                  onSaved: (value) {
-                    _postName = value;
-                  },
                 ),
               ),
 
@@ -114,10 +170,10 @@ class _Request extends State<Request> {
               Padding(
                 padding: EdgeInsetsGeometry.only(bottom: 10),
                 child: TextFormField(
+                  controller: _postDescription,
                   keyboardType: TextInputType.multiline,
                   decoration: const InputDecoration(
                     hintText: "Describe what you're looking for...",
-                    // prefixIcon: Icon(Icons.description),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
@@ -130,10 +186,6 @@ class _Request extends State<Request> {
                       return 'Please be more descriptive';
                     }
                     return null;
-                  },
-
-                  onSaved: (value) {
-                    _postDescription = value;
                   },
                 ),
               ),
@@ -153,6 +205,7 @@ class _Request extends State<Request> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         isExpanded: true,
+                        value: _selectedCategory,
                         decoration: const InputDecoration(
                           hintText: "Select a category",
                           prefixIcon: Icon(Icons.category),
@@ -172,6 +225,7 @@ class _Request extends State<Request> {
                           if (value == null) {
                             return 'Please select a category';
                           }
+                          return null;
                         },
 
                         onChanged: (String? value) {
@@ -217,6 +271,7 @@ class _Request extends State<Request> {
                           if (value == null) {
                             return 'Please select a subcategory';
                           }
+                          return null;
                         },
 
                         onChanged: _selectedCategory == null
@@ -243,6 +298,7 @@ class _Request extends State<Request> {
               Padding(
                 padding: EdgeInsetsGeometry.only(bottom: 10),
                 child: DropdownButtonFormField<String>(
+                  value: _selectedLocation,
                   decoration: const InputDecoration(
                     hintText: "Location",
                     prefixIcon: Icon(Icons.location_on_rounded),
