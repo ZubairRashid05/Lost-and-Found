@@ -185,6 +185,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    _loadData();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = Supabase.instance.client.auth.currentUser;
     final userEmail = currentUser?.email ?? 'user@campus.edu';
@@ -431,13 +432,14 @@ class _HomeState extends State<Home> {
   }
 
   void showProductDetails(Product product) {
+    final isNetworkImage = product.imageUrl.startsWith('http');
     Navigator.push(
       context,
       PageRouteBuilder(
-        opaque: false,
+        opaque: true,
         barrierDismissible: true,
         barrierColor: Colors.black54,
-        transitionDuration: const Duration(milliseconds: 300),
+        transitionDuration: const Duration(milliseconds: 100),
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
             FadeTransition(opacity: animation, child: child),
         pageBuilder: (context, animation, secondaryAnimation) => Dialog(
@@ -454,11 +456,26 @@ class _HomeState extends State<Home> {
                 SizedBox(
                   height: 320,
                   child: Stack(
+                    // fit: StackFit.passthrough,
                     fit: StackFit.expand,
                     children: [
                       Hero(
                         tag: product,
-                        child: Image.asset(product.imageUrl, fit: BoxFit.cover),
+                        child: isNetworkImage
+                            ? Image.network(
+                                product.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return _imageError();
+                                },
+                              )
+                            : Image.asset(
+                                product.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return _imageError();
+                                },
+                              ),
                       ),
                       DecoratedBox(
                         decoration: BoxDecoration(
@@ -588,4 +605,15 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+}
+
+Widget _imageError() {
+  return Container(
+    color: Colors.deepPurple.shade100,
+    child: const Icon(
+      Icons.image_not_supported,
+      size: 50,
+      color: Colors.deepPurple,
+    ),
+  );
 }
