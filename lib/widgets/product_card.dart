@@ -28,6 +28,9 @@ class ProductCard extends StatelessWidget {
           children: [
             // Product Image
             Positioned.fill(
+              child: Hero(
+                tag: product,
+                child: Image.asset(product.imageUrl, fit: BoxFit.cover),
               child: Image.asset(
                 product.imageUrl,
                 fit: BoxFit.cover,

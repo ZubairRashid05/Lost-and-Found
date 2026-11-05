@@ -191,6 +191,15 @@ class _LoginPageState extends State<LoginPage> {
                     style: authLinkButtonStyle,
                     child: const Text('Sign Up'),
                   ),
+                  TextButton(
+                    onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/homepage',
+                      (route) => false,
+                    ),
+                    style: authLinkButtonStyle,
+                    child: const Text('Continue as guest'),
+                    )
                 ],
               ),
             ],
