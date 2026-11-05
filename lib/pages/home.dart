@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:lost_and_found/main.dart';
 import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/pages/settings.dart';
@@ -16,12 +13,29 @@ class Home extends StatefulWidget {
 }
 
 Future<List<Product>> loadProducts() async {
-  final String response = await rootBundle.loadString(
-    'lib/assets/database/data.json',
-  );
-  final Map<String, dynamic> data = jsonDecode(response);
-  final List<dynamic> productList = data['products'];
-  return productList.map((jsonItem) => Product.fromJson(jsonItem)).toList();
+  final rows = await Supabase.instance.client
+      .from('products')
+      .select(
+        'name, description, category, subcategory, last_location, '
+        'image1_url, image2_url, user_name',
+      );
+
+  return (rows as List).map((row) {
+    final imageUrl = row['image1_url'] as String?;
+
+    return Product(
+      name: row['name'] as String? ?? 'Unnamed item',
+      description: row['description'] as String? ?? '',
+      category: row['category'] as String? ?? 'n/a',
+      subcategory: row['subcategory'] as String? ?? 'n/a',
+      username: row['user_name'] as String? ?? 'n/a',
+      location: row['last_location'] as String? ?? 'n/a',
+      imageUrl: imageUrl?.isNotEmpty == true
+          ? imageUrl!
+          : 'lib/assets/images/images.jpeg',
+      isFound: false,
+    );
+  }).toList();
 }
 
 class _HomeState extends State<Home> {

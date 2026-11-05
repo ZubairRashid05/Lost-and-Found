@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'dart:io';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_found/model/draft.dart';
 import 'package:lost_and_found/pages/draft.dart';
@@ -102,9 +104,8 @@ class _Request extends State<Request> {
     _clearForm();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Draft saved.')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Draft saved.')));
   }
 
   Future<void> _openDrafts() async {
@@ -122,8 +123,8 @@ class _Request extends State<Request> {
       _selectedLocation = draft.location;
       selectedImage =
           draft.imagePath != null && File(draft.imagePath!).existsSync()
-              ? File(draft.imagePath!)
-              : null;
+          ? File(draft.imagePath!)
+          : null;
     });
   }
 
@@ -149,13 +150,9 @@ class _Request extends State<Request> {
 
     final path = 'posts/$fileName';
 
-    await supabase.storage
-        .from('post-images')
-        .upload(path, image);
+    await supabase.storage.from('post_images').upload(path, image);
 
-    final imageUrl = supabase.storage
-        .from('post-images')
-        .getPublicUrl(path);
+    final imageUrl = supabase.storage.from('post_images').getPublicUrl(path);
 
     return imageUrl;
   }
@@ -212,9 +209,8 @@ class _Request extends State<Request> {
       _clearForm();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving post: $error')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error saving post: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -467,7 +463,10 @@ class _Request extends State<Request> {
                                     color: Colors.grey,
                                   ),
                                   SizedBox(height: 8),
-                                  Text("Upload an image", textAlign: TextAlign.center),
+                                  Text(
+                                    "Upload an image",
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ],
                               ),
                             ),
@@ -483,7 +482,10 @@ class _Request extends State<Request> {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(selectedImage!, fit: BoxFit.cover),
+                                  child: Image.file(
+                                    selectedImage!,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                               Positioned(
@@ -494,7 +496,11 @@ class _Request extends State<Request> {
                                   radius: 16,
                                   child: IconButton(
                                     padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.close, size: 16, color: Colors.white),
+                                    icon: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
                                     onPressed: () {
                                       setState(() {
                                         selectedImage = null;
@@ -521,7 +527,10 @@ class _Request extends State<Request> {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(selectedImage2!, fit: BoxFit.cover),
+                                  child: Image.file(
+                                    selectedImage2!,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                               Positioned(
@@ -532,7 +541,11 @@ class _Request extends State<Request> {
                                   radius: 16,
                                   child: IconButton(
                                     padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.close, size: 16, color: Colors.white),
+                                    icon: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
                                     onPressed: () {
                                       setState(() {
                                         selectedImage2 = null;
@@ -564,7 +577,10 @@ class _Request extends State<Request> {
                                       color: Colors.grey,
                                     ),
                                     SizedBox(height: 8),
-                                    Text("Upload another image", textAlign: TextAlign.center),
+                                    Text(
+                                      "Upload another image",
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ],
                                 ),
                               ),
