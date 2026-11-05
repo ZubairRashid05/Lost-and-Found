@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:lost_and_found/pages/home.dart';
-import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/pages/request.dart';
 import 'package:lost_and_found/pages/inbox.dart';
 import 'package:lost_and_found/pages/profile.dart';
@@ -31,35 +30,41 @@ class _HomePage extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedPage],
       bottomNavigationBar: Container(
-        margin: EdgeInsets.all(20),
+        margin: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? Colors.grey.shade900 : Colors.white,
           borderRadius: BorderRadius.circular(80),
           boxShadow: [
             BoxShadow(
               blurRadius: 20,
-              color: Colors.black.withValues(alpha: .1),
+              color: isDark
+                  ? Colors.black.withValues(alpha: .5)
+                  : Colors.black.withValues(alpha: .1),
             ),
           ],
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: GNav(
-            color: Colors.black,
+            color: isDark ? Colors.white70 : Colors.black,
             backgroundColor: Colors.transparent,
-            activeColor: Colors.lightBlueAccent.shade200,
-            tabBackgroundColor: Colors.grey.shade800,
+            activeColor: isDark
+                ? Colors.lightBlueAccent.shade100
+                : Colors.lightBlueAccent.shade700,
+            tabBackgroundColor:
+                isDark ? Colors.grey.shade800 : Colors.grey.shade200,
             padding: const EdgeInsets.all(10),
             gap: 15,
             onTabChange: _navigateBottomBar,
             tabs: const [
               GButton(icon: Icons.home, text: "Home"),
-              // GButton(icon: Icons.dynamic_feed, text: "My Posts"),
-              GButton(icon: Icons.add_circle_outline),
+              GButton(icon: Icons.add_circle_outline, text: "Create"),
               GButton(icon: Icons.local_post_office_outlined, text: "Inbox"),
               GButton(icon: Icons.person, text: "Profile"),
             ],
