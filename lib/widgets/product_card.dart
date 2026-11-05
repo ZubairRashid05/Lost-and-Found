@@ -30,20 +30,20 @@ class ProductCard extends StatelessWidget {
             Positioned.fill(
               child: Hero(
                 tag: product,
-                child: Image.asset(product.imageUrl, fit: BoxFit.cover),
-              child: Image.asset(
-                product.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.deepPurple.shade100,
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      size: 50,
-                      color: Colors.deepPurple,
-                    ),
-                  );
-                },
+                child: Image.asset(
+                  product.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.deepPurple.shade100,
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        size: 50,
+                        color: Colors.deepPurple,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
@@ -68,8 +68,10 @@ class ProductCard extends StatelessWidget {
               top: 12,
               left: 12,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: product.isFound ? Colors.green : Colors.redAccent,
                   borderRadius: BorderRadius.circular(30),

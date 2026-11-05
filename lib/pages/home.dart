@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:lost_and_found/main.dart';
@@ -58,25 +59,21 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void updateCrossAxisCount() {
-    if (_crossAxisCount == 2) {
-      setState(() {
-        _crossAxisCount = 1;
-      });
-    } else {
-      setState(() {
-        _crossAxisCount += 1;
-      });
-    }
   void _applyFilter() {
     setState(() {
       _filteredProducts = _allProducts.where((product) {
-        final matchesQuery = _searchQuery.isEmpty ||
+        final matchesQuery =
+            _searchQuery.isEmpty ||
             product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            product.description.toLowerCase().contains(_searchQuery.toLowerCase());
+            product.description.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            );
 
-        final matchesLocation = _selectedLocation == 'All' ||
-            product.location.toLowerCase().contains(_selectedLocation.toLowerCase());
+        final matchesLocation =
+            _selectedLocation == 'All' ||
+            product.location.toLowerCase().contains(
+              _selectedLocation.toLowerCase(),
+            );
 
         return matchesQuery && matchesLocation;
       }).toList();
@@ -157,7 +154,9 @@ class _HomeState extends State<Home> {
               "3. How to claim?",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text("Message the finder or contact security with verification proof."),
+            Text(
+              "Message the finder or contact security with verification proof.",
+            ),
           ],
         ),
         actions: [
@@ -175,7 +174,8 @@ class _HomeState extends State<Home> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = Supabase.instance.client.auth.currentUser;
     final userEmail = currentUser?.email ?? 'user@campus.edu';
-    final userUsername = currentUser?.userMetadata?['username'] ?? 'Campus User';
+    final userUsername =
+        currentUser?.userMetadata?['username'] ?? 'Campus User';
 
     return Scaffold(
       appBar: AppBar(
@@ -185,7 +185,9 @@ class _HomeState extends State<Home> {
             icon: Icon(
               _crossAxisCount == 1
                   ? Icons.grid_view
-                  : (_crossAxisCount == 2 ? Icons.view_module : Icons.view_list),
+                  : (_crossAxisCount == 2
+                        ? Icons.view_module
+                        : Icons.view_list),
             ),
             onPressed: _updateCrossAxisCount,
             tooltip: 'Change Grid View',
@@ -199,7 +201,10 @@ class _HomeState extends State<Home> {
             UserAccountsDrawerHeader(
               accountName: Text(
                 userUsername,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               accountEmail: Text(userEmail),
               currentAccountPicture: const CircleAvatar(
@@ -224,8 +229,9 @@ class _HomeState extends State<Home> {
                   ),
                   value: isDarkMode,
                   onChanged: (bool value) {
-                    themeNotifier.value =
-                        value ? ThemeMode.dark : ThemeMode.light;
+                    themeNotifier.value = value
+                        ? ThemeMode.dark
+                        : ThemeMode.light;
                   },
                 );
               },
@@ -254,7 +260,10 @@ class _HomeState extends State<Home> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.settings_outlined, color: Colors.deepPurple),
+              leading: const Icon(
+                Icons.settings_outlined,
+                color: Colors.deepPurple,
+              ),
               title: const Text("Profile Settings"),
               onTap: () async {
                 Navigator.pop(context);
@@ -272,7 +281,10 @@ class _HomeState extends State<Home> {
 
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: const Text("Sign Out", style: TextStyle(color: Colors.redAccent)),
+              title: const Text(
+                "Sign Out",
+                style: TextStyle(color: Colors.redAccent),
+              ),
               onTap: () async {
                 Navigator.pop(context);
                 await Supabase.instance.client.auth.signOut();
@@ -293,18 +305,6 @@ class _HomeState extends State<Home> {
           children: [
             // Search Input Field
             Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: GridView.builder(
-                shrinkWrap: true, // Ensures GridView takes only the height it needs inside SingleChildScrollView
-                physics: const NeverScrollableScrollPhysics(), // Disables GridView's internal scroll (outer SingleChildScrollView handles scrolling)
-                itemCount: products.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: _crossAxisCount, // Dynamic crossAxisCount
-                  crossAxisSpacing: 12.0, // Space between columns
-                  mainAxisSpacing: 12.0, // Space between rows
-                  childAspectRatio: _crossAxisCount == 1
-                      ? 2.2
-                      : (_crossAxisCount == 2 ? 0.75 : 0.6),
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: TextField(
                 onChanged: (value) {
@@ -315,7 +315,9 @@ class _HomeState extends State<Home> {
                   hintText: "Search items, e.g., keys, wallet...",
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
-                  fillColor: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+                  fillColor: isDark
+                      ? Colors.grey.shade900
+                      : Colors.grey.shade100,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -333,10 +335,6 @@ class _HomeState extends State<Home> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 itemCount: _locations.length,
                 itemBuilder: (context, index) {
-                  final product = products[index];
-                  return GestureDetector(
-                    onTap: () => showProductDetails(product),
-                    child: ProductCard(product: product),
                   final loc = _locations[index];
                   final isSelected = _selectedLocation == loc;
                   return Padding(
@@ -344,7 +342,9 @@ class _HomeState extends State<Home> {
                     child: FilterChip(
                       selected: isSelected,
                       label: Text(loc),
-                      selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                      selectedColor: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer,
                       onSelected: (selected) {
                         setState(() {
                           _selectedLocation = loc;
@@ -369,14 +369,18 @@ class _HomeState extends State<Home> {
                           Icon(
                             Icons.search_off_rounded,
                             size: 60,
-                            color: isDark ? Colors.white38 : Colors.grey.shade400,
+                            color: isDark
+                                ? Colors.white38
+                                : Colors.grey.shade400,
                           ),
                           const SizedBox(height: 12),
                           Text(
                             "No matching items found",
                             style: TextStyle(
                               fontSize: 16,
-                              color: isDark ? Colors.white70 : Colors.grey.shade600,
+                              color: isDark
+                                  ? Colors.white70
+                                  : Colors.grey.shade600,
                             ),
                           ),
                         ],
@@ -398,7 +402,11 @@ class _HomeState extends State<Home> {
                             : (_crossAxisCount == 2 ? 0.78 : 0.65),
                       ),
                       itemBuilder: (context, index) {
-                        return ProductCard(product: _filteredProducts[index]);
+                        final product = _filteredProducts[index];
+                        return GestureDetector(
+                          onTap: () => showProductDetails(product),
+                          child: ProductCard(product: product),
+                        );
                       },
                     ),
                   ),
@@ -407,15 +415,16 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-    void showProductDetails(Product product) {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          opaque: false,
-          barrierDismissible: true,
-          barrierColor: Colors.black54,
-          transitionDuration: const Duration(milliseconds: 300),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+
+  void showProductDetails(Product product) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
             FadeTransition(opacity: animation, child: child),
         pageBuilder: (context, animation, secondaryAnimation) => Dialog(
           insetPadding: const EdgeInsets.all(20),
