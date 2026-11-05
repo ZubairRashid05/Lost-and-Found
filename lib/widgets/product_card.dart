@@ -8,6 +8,8 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNetworkImage = product.imageUrl.startsWith('http');
+
     return Container(
       height: 200,
       width: double.infinity,
@@ -26,28 +28,27 @@ class ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
-            // Product Image
             Positioned.fill(
               child: Hero(
                 tag: product,
-                child: Image.asset(
-                  product.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.deepPurple.shade100,
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        size: 50,
-                        color: Colors.deepPurple,
+                child: isNetworkImage
+                    ? Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _imageError();
+                        },
+                      )
+                    : Image.asset(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _imageError();
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
             ),
 
-            // Gradient Overlay for Readability
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -63,7 +64,6 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // Status Badge (Top-Left)
             Positioned(
               top: 12,
               left: 12,
@@ -75,12 +75,6 @@ class ProductCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: product.isFound ? Colors.green : Colors.redAccent,
                   borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 4,
-                    ),
-                  ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -94,12 +88,11 @@ class ProductCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      product.isFound ? "FOUND" : "LOST",
+                      product.isFound ? 'FOUND' : 'LOST',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -107,11 +100,10 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // Item Details (Bottom)
             Align(
               alignment: Alignment.bottomLeft,
               child: Padding(
-                padding: const EdgeInsets.all(14.0),
+                padding: const EdgeInsets.all(14),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +119,7 @@ class ProductCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3.0),
+                    const SizedBox(height: 3),
                     Text(
                       product.description,
                       style: const TextStyle(
@@ -137,7 +129,7 @@ class ProductCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6.0),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
                         const Icon(
@@ -152,7 +144,6 @@ class ProductCard extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.lightBlueAccent,
-                              fontWeight: FontWeight.w500,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -166,6 +157,17 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _imageError() {
+    return Container(
+      color: Colors.deepPurple.shade100,
+      child: const Icon(
+        Icons.image_not_supported,
+        size: 50,
+        color: Colors.deepPurple,
       ),
     );
   }
