@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-
 import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lost_and_found/model/draft.dart';
+import 'package:lost_and_found/pages/draft.dart';
 
 class Request extends StatefulWidget {
   const Request({super.key});
@@ -12,8 +12,8 @@ class Request extends StatefulWidget {
 }
 
 class _Request extends State<Request> {
-  String? _postName;
-  String? _postDescription;
+  final _postName = TextEditingController();
+  final _postDescription = TextEditingController();
   String? _selectedCategory;
   String? _selectedSubcategory;
   String? _selectedLocation;
@@ -40,9 +40,86 @@ class _Request extends State<Request> {
     'Recreation Centre',
   ];
 
+  @override
+  void dispose() {
+    _postName.dispose();
+    _postDescription.dispose();
+    super.dispose();
+  }
+
+  void _clearForm() {
+    setState(() {
+      _postName.clear();
+      _postDescription.clear();
+      _selectedCategory = null;
+      _selectedSubcategory = null;
+      _selectedLocation = null;
+      selectedImage = null;
+    });
+    _formKey.currentState?.reset();
+  }
+
+  Future<void> _saveDraft() async {
+    final title = _postName.text.trim();
+    final description = _postDescription.text.trim();
+
+    // Prevent saving an empty draft
+    if (title.isEmpty &&
+        description.isEmpty &&
+        _selectedCategory == null &&
+        _selectedSubcategory == null &&
+        _selectedLocation == null &&
+        selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot save an empty draft.')),
+      );
+      return;
+    }
+
+    final draft = RequestDraft(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: title,
+      description: description,
+      category: _selectedCategory,
+      subcategory: _selectedSubcategory,
+      location: _selectedLocation,
+      imagePath: selectedImage?.path,
+      updatedAt: DateTime.now(),
+    );
+
+    await DraftStorage.save(draft);
+
+    // Clear form after saving draft
+    _clearForm();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Draft saved.')),
+    );
+  }
+
+  Future<void> _openDrafts() async {
+    final draft = await Navigator.push<RequestDraft>(
+      context,
+      MaterialPageRoute(builder: (_) => const DraftPage()),
+    );
+    if (draft == null || !mounted) return;
+
+    setState(() {
+      _postName.text = draft.title;
+      _postDescription.text = draft.description;
+      _selectedCategory = draft.category;
+      _selectedSubcategory = draft.subcategory;
+      _selectedLocation = draft.location;
+      selectedImage =
+          draft.imagePath != null && File(draft.imagePath!).existsSync()
+              ? File(draft.imagePath!)
+              : null;
+    });
+  }
+
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
-
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
@@ -56,35 +133,47 @@ class _Request extends State<Request> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    _formKey.currentState!.save();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Post created successfully!'),
-      ),
+      const SnackBar(content: Text('Post created successfully!')),
     );
+
+    _clearForm();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Post")),
-
+      appBar: AppBar(
+        title: const Text("Create Post"),
+        actions: [
+          IconButton(
+            onPressed: _saveDraft,
+            tooltip: 'Save draft',
+            icon: const Icon(Icons.save_outlined),
+          ),
+          IconButton(
+            onPressed: _openDrafts,
+            tooltip: 'Open drafts',
+            icon: const Icon(Icons.drafts_sharp),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(left: 20, right: 20, top: 12),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 12),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
                 child: Text("Title", style: TextStyle(fontSize: 18)),
               ),
-
               Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: TextFormField(
+                  controller: _postName,
                   decoration: const InputDecoration(
                     hintText: "What would you like to call this post?",
                     prefixIcon: Icon(Icons.title),
@@ -92,67 +181,54 @@ class _Request extends State<Request> {
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   ),
-
                   validator: (value) {
-                    if (value == null || value.isEmpty || value.length < 3) {
+                    if (value == null || value.trim().isEmpty || value.trim().length < 3) {
                       return 'Please enter a title of at least 3 characters';
                     }
                     return null;
                   },
-
-                  onSaved: (value) {
-                    _postName = value;
-                  },
                 ),
               ),
-
-              Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
                 child: Text("Description", style: TextStyle(fontSize: 18)),
               ),
-
               Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: TextFormField(
+                  controller: _postDescription,
                   keyboardType: TextInputType.multiline,
                   decoration: const InputDecoration(
                     hintText: "Describe what you're looking for...",
-                    // prefixIcon: Icon(Icons.description),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   ),
                   maxLines: 3,
                   maxLength: 500,
-
                   validator: (value) {
-                    if (value == null || value.isEmpty || value.length < 20) {
-                      return 'Please be more descriptive';
+                    if (value == null || value.trim().isEmpty || value.trim().length < 20) {
+                      return 'Please be more descriptive (at least 20 characters)';
                     }
                     return null;
                   },
-
-                  onSaved: (value) {
-                    _postDescription = value;
-                  },
                 ),
               ),
-
-              Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
                 child: Text(
                   "Category & Subcategory",
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-
               Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         isExpanded: true,
+                        initialValue: _selectedCategory,
                         decoration: const InputDecoration(
                           hintText: "Select a category",
                           prefixIcon: Icon(Icons.category),
@@ -160,20 +236,18 @@ class _Request extends State<Request> {
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                         ),
-
                         items: categories.keys.map((category) {
                           return DropdownMenuItem<String>(
                             value: category,
                             child: Text(category),
                           );
                         }).toList(),
-
                         validator: (value) {
                           if (value == null) {
                             return 'Please select a category';
                           }
+                          return null;
                         },
-
                         onChanged: (String? value) {
                           setState(() {
                             _selectedCategory = value;
@@ -182,14 +256,7 @@ class _Request extends State<Request> {
                         },
                       ),
                     ),
-
-                    Padding(
-                      padding: const EdgeInsetsGeometry.only(
-                        left: 10,
-                        right: 10,
-                      ),
-                    ),
-
+                    const SizedBox(width: 10),
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         key: ValueKey(_selectedCategory),
@@ -200,7 +267,7 @@ class _Request extends State<Request> {
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                         ),
-                        value: _selectedSubcategory,
+                        initialValue: _selectedSubcategory,
                         items: (categories[_selectedCategory] ?? []).map((
                           subcategory,
                         ) {
@@ -212,13 +279,12 @@ class _Request extends State<Request> {
                             ),
                           );
                         }).toList(),
-
                         validator: (value) {
                           if (value == null) {
                             return 'Please select a subcategory';
                           }
+                          return null;
                         },
-
                         onChanged: _selectedCategory == null
                             ? null
                             : (value) {
@@ -231,18 +297,17 @@ class _Request extends State<Request> {
                   ],
                 ),
               ),
-
-              Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
                 child: Text(
                   "Last Known Location",
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-
               Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: DropdownButtonFormField<String>(
+                  initialValue: _selectedLocation,
                   decoration: const InputDecoration(
                     hintText: "Location",
                     prefixIcon: Icon(Icons.location_on_rounded),
@@ -250,14 +315,12 @@ class _Request extends State<Request> {
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   ),
-
                   items: locations.map((location) {
                     return DropdownMenuItem<String>(
                       value: location,
                       child: Text(location),
                     );
                   }).toList(),
-
                   onChanged: (String? newValue) {
                     setState(() {
                       _selectedLocation = newValue;
@@ -265,12 +328,10 @@ class _Request extends State<Request> {
                   },
                 ),
               ),
-
-              Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
                 child: Text("Upload Image", style: TextStyle(fontSize: 18)),
               ),
-
               InkWell(
                 onTap: pickImage,
                 child: Container(
@@ -280,7 +341,6 @@ class _Request extends State<Request> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10),
                   ),
-
                   child: selectedImage == null
                       ? const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -300,9 +360,8 @@ class _Request extends State<Request> {
                         ),
                 ),
               ),
-
               Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 10, top: 19),
+                padding: const EdgeInsets.only(bottom: 10, top: 19),
                 child: Container(
                   alignment: Alignment.center,
                   child: ElevatedButton(
@@ -310,15 +369,14 @@ class _Request extends State<Request> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,
                     ),
-                    child: Text(
+                    child: const Text(
                       "Create Post",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
               ),
-
-              SizedBox(height: 150),
+              const SizedBox(height: 150),
             ],
           ),
         ),
