@@ -14,6 +14,7 @@ class ProductCard extends StatelessWidget {
       height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -29,26 +30,22 @@ class ProductCard extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: Hero(
-                tag: product,
-                child: isNetworkImage
-                    ? Image.network(
-                        product.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _imageError();
-                        },
-                      )
-                    : Image.asset(
-                        product.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _imageError();
-                        },
-                      ),
-              ),
+              child: isNetworkImage
+                  ? Image.network(
+                      product.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return _imageError();
+                      },
+                    )
+                  : Image.asset(
+                      product.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return _imageError();
+                      },
+                    ),
             ),
-
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -63,7 +60,6 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
             ),
-
             Positioned(
               top: 12,
               left: 12,
@@ -99,7 +95,6 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
             ),
-
             Align(
               alignment: Alignment.bottomLeft,
               child: Padding(
