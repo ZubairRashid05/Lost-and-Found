@@ -5,6 +5,7 @@ import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/pages/request.dart';
 import 'package:lost_and_found/pages/inbox.dart';
 import 'package:lost_and_found/pages/profile.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,7 +34,11 @@ class _HomePage extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: _pages[_selectedPage],
+      body: 
+        Supabase.instance.client.auth.currentSession == null &&
+          _selectedPage !=0
+        ? const SignInRequired()
+        : _pages[_selectedPage],
       bottomNavigationBar: Container(
         margin: EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -64,6 +69,39 @@ class _HomePage extends State<HomePage> {
               GButton(icon: Icons.person, text: "Profile"),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class SignInRequired extends StatelessWidget {
+  const SignInRequired({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Sign in required")),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.lock_outline, size: 60, color: Colors.grey),
+            const SizedBox(height: 12),
+            const Text(
+              "Sign in to use this page",
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              ),
+              child: const Text("Sign in"),
+            ),
+          ],
         ),
       ),
     );

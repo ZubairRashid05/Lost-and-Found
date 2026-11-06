@@ -3,6 +3,7 @@ import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/model/user.dart';
 import 'package:lost_and_found/widgets/product_card.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 
 import 'dart:convert';
 
@@ -191,6 +192,7 @@ class _Home extends State<Home> {
                             ),
                           ),
                           const SizedBox(width: 8),
+                          if(Supabase.instance.client.auth.currentSession != null)
                           const Icon(Icons.chat_bubble_outline, size: 20),
                           const Spacer(),
                           Chip(
