@@ -439,30 +439,9 @@ class _HomeState extends State<Home> {
   }
 
   void showProductDetails(Product product) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        opaque: false,
-        barrierDismissible: true,
-        barrierColor: Colors.black.withValues(alpha: 0.65),
-        transitionDuration: const Duration(milliseconds: 320),
-        reverseTransitionDuration: const Duration(milliseconds: 260),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          final curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.fastOutSlowIn,
-            reverseCurve: Curves.easeInOut,
-          );
-          return FadeTransition(
-            opacity: curvedAnimation,
-            child: child,
-          );
-        },
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            ProductPopUp(product: product),
-      ),
+    showDialog(
+      context: context,
+      builder: (context) => ProductPopUp(product: product),
     );
   }
 }
-
-

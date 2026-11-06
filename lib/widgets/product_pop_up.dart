@@ -126,7 +126,6 @@ class _ProductPopUpState extends State<ProductPopUp> {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = 'product_card_${widget.product.name}_${widget.product.imageUrl}';
     final imageUrls = widget.product.imageUrls;
     final maxHeight = MediaQuery.of(context).size.height * 0.85;
 
@@ -141,128 +140,122 @@ class _ProductPopUpState extends State<ProductPopUp> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Hero(
-                tag: heroTag,
-                child: Material(
-                  color: Colors.transparent,
-                  child: SizedBox(
-                    height: 280,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(24),
-                      ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          PageView.builder(
-                            itemCount: imageUrls.length,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _activePageIndex = index;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              final url = imageUrls[index];
-                              final isNet = url.startsWith('http');
+              SizedBox(
+                height: 280,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      PageView.builder(
+                        itemCount: imageUrls.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _activePageIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          final url = imageUrls[index];
+                          final isNet = url.startsWith('http');
 
-                              Widget imageWidget = isNet
-                                  ? Image.network(
-                                      url,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              _imageError(),
-                                    )
-                                  : Image.asset(
-                                      url,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              _imageError(),
-                                    );
+                          Widget imageWidget = isNet
+                              ? Image.network(
+                                  url,
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          _imageError(),
+                                )
+                              : Image.asset(
+                                  url,
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          _imageError(),
+                                );
 
-                              return GestureDetector(
-                                onTap: () => _openFullscreenViewer(
-                                  context,
-                                  imageUrls,
-                                  index,
-                                ),
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    imageWidget,
-                                    DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.black.withValues(alpha: 0.2),
-                                            Colors.black.withValues(alpha: 0.85),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white),
-                              style: IconButton.styleFrom(
-                                backgroundColor: Colors.black38,
-                              ),
-                              onPressed: () => Navigator.pop(context),
+                          return GestureDetector(
+                            onTap: () => _openFullscreenViewer(
+                              context,
+                              imageUrls,
+                              index,
                             ),
-                          ),
-
-                          if (imageUrls.length > 1)
-                            Positioned(
-                              top: 12,
-                              left: 12,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  "${_activePageIndex + 1} / ${imageUrls.length}",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                imageWidget,
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.black.withValues(alpha: 0.2),
+                                        Colors.black.withValues(alpha: 0.85),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
+                          );
+                        },
+                      ),
 
-                          Positioned(
-                            left: 20,
-                            right: 80,
-                            bottom: 16,
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black38,
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+
+                      if (imageUrls.length > 1)
+                        Positioned(
+                          top: 12,
+                          left: 12,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             child: Text(
-                              widget.product.name,
+                              "${_activePageIndex + 1} / ${imageUrls.length}",
                               style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
                                 color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ],
+                        ),
+
+                      Positioned(
+                        left: 20,
+                        right: 80,
+                        bottom: 16,
+                        child: Text(
+                          widget.product.name,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
