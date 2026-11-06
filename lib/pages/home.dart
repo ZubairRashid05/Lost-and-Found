@@ -23,7 +23,13 @@ Future<List<Product>> loadProducts() async {
       );
 
   return (rows as List).map((row) {
-    final imageUrl = row['image1_url'] as String?;
+    final img1 = row['image1_url'] as String?;
+    final img2 = row['image2_url'] as String?;
+
+    final List<String> urls = [];
+    if (img1 != null && img1.trim().isNotEmpty) urls.add(img1);
+    if (img2 != null && img2.trim().isNotEmpty) urls.add(img2);
+    if (urls.isEmpty) urls.add('lib/assets/images/images.jpeg');
 
     return Product(
       name: row['name'] as String? ?? 'Unnamed item',
@@ -32,9 +38,8 @@ Future<List<Product>> loadProducts() async {
       subcategory: row['subcategory'] as String? ?? 'n/a',
       username: row['user_name'] as String? ?? 'n/a',
       location: row['last_location'] as String? ?? 'n/a',
-      imageUrl: imageUrl?.isNotEmpty == true
-          ? imageUrl!
-          : 'lib/assets/images/images.jpeg',
+      imageUrl: urls.first,
+      imageUrls: urls,
       isFound: false,
     );
   }).toList();
@@ -66,6 +71,7 @@ class _HomeState extends State<Home> {
   Future<void> _loadData() async {
     try {
       final loadedProducts = await loadProducts();
+      if (!mounted) return;
       setState(() {
         _allProducts = loadedProducts;
         _applyFilter();
@@ -187,7 +193,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    // _loadData();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = Supabase.instance.client.auth.currentUser;
     final userEmail = currentUser?.email ?? 'user@campus.edu';
@@ -439,21 +444,25 @@ class _HomeState extends State<Home> {
       PageRouteBuilder(
         opaque: false,
         barrierDismissible: true,
-        barrierColor: Colors.black54,
-        transitionDuration: const Duration(milliseconds: 600),
-        // Do not replay the full-size Hero while the route is being dismissed.
-        // reverseTransitionDuration: const Duration(milliseconds: 300),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              ),
-              child: child,
-            ),
+        barrierColor: Colors.black.withValues(alpha: 0.65),
+        transitionDuration: const Duration(milliseconds: 320),
+        reverseTransitionDuration: const Duration(milliseconds: 260),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.fastOutSlowIn,
+            reverseCurve: Curves.easeInOut,
+          );
+          return FadeTransition(
+            opacity: curvedAnimation,
+            child: child,
+          );
+        },
         pageBuilder: (context, animation, secondaryAnimation) =>
             ProductPopUp(product: product),
       ),
     );
   }
 }
+
+
