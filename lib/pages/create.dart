@@ -296,7 +296,7 @@ class _Request extends State<Request> {
                   maxLength: 500,
 
                   validator: (value) {
-                    if (value == null || value.isEmpty || value.length < 10) {
+                    if (value == null || value.isEmpty || value.length < 5) {
                       return 'Please be more descriptive';
                     }
                     return null;

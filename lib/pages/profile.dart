@@ -14,18 +14,38 @@ class Profile extends StatefulWidget {
 }
 
 Future<List<Product>> loadProducts() async {
-  final String response = await rootBundle.loadString(
-    'lib/assets/database/data.json',
-  );
-  final Map<String, dynamic> data = jsonDecode(response);
-  final List<dynamic> productList = data['products'];
+  final currentUser = Supabase.instance.client.auth.currentUser;
+  if (currentUser == null) return [];
 
-  // Convert the raw dynamic list into a typed list of User objects
-  return productList.map((jsonItem) => Product.fromJson(jsonItem)).toList();
+  final rows = await Supabase.instance.client
+      .from('products')
+      .select(
+        'name, description, category, subcategory, last_location, '
+        'image1_url, image2_url, user_name',
+      )
+      .eq('user_id', currentUser.id);
+
+  return (rows as List).map((row) {
+    final imageUrl = row['image1_url'] as String?;
+
+    return Product(
+      name: row['name'] as String? ?? 'Unnamed item',
+      description: row['description'] as String? ?? '',
+      category: row['category'] as String? ?? 'n/a',
+      subcategory: row['subcategory'] as String? ?? 'n/a',
+      username: row['user_name'] as String? ?? 'n/a',
+      location: row['last_location'] as String? ?? 'n/a',
+      imageUrl: imageUrl?.isNotEmpty == true
+          ? imageUrl!
+          : 'lib/assets/images/images.jpeg',
+      isFound: false,
+    );
+  }).toList();
 }
 
 class _Profile extends State<Profile> {
   List<Product> products = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -37,11 +57,19 @@ class _Profile extends State<Profile> {
     try {
       final loadedProducts = await loadProducts();
 
-      setState(() {
-        products = loadedProducts;
-      });
+      if (mounted) {
+        setState(() {
+          products = loadedProducts;
+          isLoading = false;
+        });
+      }
     } catch (e) {
       debugPrint("Error loading data: $e");
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -120,42 +148,62 @@ class _Profile extends State<Profile> {
             ),
           ),
           const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              spacing: 15,
-              children: [
-                for (var x in products)
-                  Stack(
-                    children: [
-                      ProductCard(product: x),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            const snackBar = SnackBar(
-                              content: Text('Pressed edit'),
-                            );
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          child: const Text(
-                            "Edit",
-                            style: TextStyle(color: Colors.white),
+          isLoading
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : products.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          "You haven't posted any items yet.",
+                          style: TextStyle(
+                            color: isDark ? Colors.white60 : Colors.black54,
+                            fontSize: 15,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                const SizedBox(height: 80),
-              ],
-            ),
-          ),
+                    )
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Column(
+                        spacing: 15,
+                        children: [
+                          for (var x in products)
+                            Stack(
+                              children: [
+                                ProductCard(product: x),
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      const snackBar = SnackBar(
+                                        content: Text('Pressed edit'),
+                                      );
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBar);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "Edit",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          const SizedBox(height: 80),
+                        ],
+                      ),
+                    ),
         ],
       ),
     );
