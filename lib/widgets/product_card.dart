@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/product.dart';
 
-import 'dart:io';
-
 class ProductCard extends StatelessWidget {
   final Product product;
 
@@ -10,89 +8,28 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Container(
-    //   width: double.infinity,
-    //   padding: EdgeInsets.all(10),
-    //   decoration: BoxDecoration(
-    //     color: Colors.lightBlueAccent,
-    //     borderRadius: BorderRadius.circular(16),
-    //     boxShadow: [
-    //       BoxShadow(
-    //         color: Colors.black.withValues(alpha: 0.4),
-    //         spreadRadius: 2,
-    //         blurRadius: 7,
-    //         offset: const Offset(4, 4),
-    //       ),
-    //     ],
-    //   ),
-    //   child: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       ClipRect(
-    //         child: Image.asset(
-    //           product.imageUrl,
-    //           height: 100,
-    //           width: double.infinity,
-    //           fit: BoxFit.cover,
-    //         ),
-    //       ),
-    //       Padding(
-    //         padding: const EdgeInsets.all(8.0),
-    //         child: Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             Text(
-    //               product.name,
-    //               style: TextStyle(
-    //                 fontFamily: 'HelveticaNeue',
-    //                 fontSize: 18,
-    //                 fontWeight: FontWeight.w800,
-    //               ),
-    //               maxLines: 1,
-    //               overflow: TextOverflow.ellipsis,
-    //             ),
-    //             const SizedBox(height: 4.0),
-    //             Text(
-    //               product.description,
-    //               style: TextStyle(fontSize: 14),
-    //               maxLines: 2,
-    //               overflow: TextOverflow.ellipsis,
-    //             )
-    //           ]
-    //         )
-    //       )
-    //     ],
-    //   ),
-    // );
     final isNetworkImage = product.imageUrl.startsWith('http');
 
     return Container(
-      height: 180,
+      height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            spreadRadius: 2,
-            blurRadius: 7,
-            offset: const Offset(4, 4),
+            color: Colors.black.withValues(alpha: 0.15),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
             Positioned.fill(
-              child: Hero(
-                tag: product,
-                child: Image.asset(product.imageUrl, fit: BoxFit.cover),
-              ),
-            ),
-
               child: isNetworkImage
                   ? Image.network(
                       product.imageUrl,
@@ -116,18 +53,13 @@ class ProductCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
+                      Colors.black.withValues(alpha: 0.2),
+                      Colors.black.withValues(alpha: 0.85),
                     ],
                   ),
                 ),
               ),
             ),
-
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
             Positioned(
               top: 12,
               left: 12,
@@ -173,20 +105,22 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       product.name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'HelveticaNeue',
                         fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4.0),
                     const SizedBox(height: 3),
                     Text(
                       product.description,
-                      style: TextStyle(fontSize: 14, color: Colors.white),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.white70,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
