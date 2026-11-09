@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:lost_and_found/pages/home.dart';
-import 'package:lost_and_found/pages/request.dart';
+import 'package:lost_and_found/pages/create.dart';
 import 'package:lost_and_found/pages/inbox.dart';
 import 'package:lost_and_found/pages/profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -62,8 +62,9 @@ class _HomePage extends State<HomePage> {
             activeColor: isDark
                 ? Colors.lightBlueAccent.shade100
                 : Colors.lightBlueAccent.shade700,
-            tabBackgroundColor:
-                isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+            tabBackgroundColor: isDark
+                ? Colors.grey.shade800
+                : Colors.grey.shade200,
             padding: const EdgeInsets.all(10),
             gap: 15,
             onTabChange: _navigateBottomBar,
