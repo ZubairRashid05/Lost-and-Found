@@ -5,14 +5,15 @@ import 'package:lost_and_found/pages/create.dart';
 import 'package:lost_and_found/pages/inbox.dart';
 import 'package:lost_and_found/pages/profile.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class NavBar extends StatefulWidget {
+  const NavBar({super.key});
 
   @override
-  State<HomePage> createState() => _HomePage();
+  State<NavBar> createState() => _NavBar();
 }
+
 // Keep track of the page the user is on
-class _HomePage extends State<HomePage> {
+class _NavBar extends State<NavBar> {
   int _selectedPage = 0;
 
   void _navigateBottomBar(int index) {
@@ -37,40 +38,42 @@ class _HomePage extends State<HomePage> {
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedPage],
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey.shade900 : Colors.white,
-          borderRadius: BorderRadius.circular(80),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              color: isDark
-                  ? Colors.black.withValues(alpha: .5)
-                  : Colors.black.withValues(alpha: .1),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          child: GNav(
-            color: isDark ? Colors.white70 : Colors.black,
-            backgroundColor: Colors.transparent,
-            activeColor: isDark
-                ? Colors.lightBlueAccent.shade100
-                : Colors.lightBlueAccent.shade700,
-            tabBackgroundColor: isDark
-                ? Colors.grey.shade800
-                : Colors.grey.shade200,
-            padding: const EdgeInsets.all(10),
-            gap: 15,
-            onTabChange: _navigateBottomBar,
-            tabs: const [
-              GButton(icon: Icons.home, text: "Home"),
-              GButton(icon: Icons.add_circle_outline, text: "Create"),
-              GButton(icon: Icons.local_post_office_outlined, text: "Inbox"),
-              GButton(icon: Icons.person, text: "Profile"),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          margin: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey.shade900 : Colors.white,
+            borderRadius: BorderRadius.circular(80),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20,
+                color: isDark
+                    ? Colors.black.withValues(alpha: .5)
+                    : Colors.black.withValues(alpha: .1),
+              ),
             ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: GNav(
+              color: isDark ? Colors.white70 : Colors.black,
+              backgroundColor: Colors.transparent,
+              activeColor: isDark
+                  ? Colors.lightBlueAccent.shade100
+                  : Colors.lightBlueAccent.shade700,
+              tabBackgroundColor: isDark
+                  ? Colors.grey.shade800
+                  : Colors.grey.shade200,
+              padding: const EdgeInsets.all(10),
+              gap: 15,
+              onTabChange: _navigateBottomBar,
+              tabs: const [
+                GButton(icon: Icons.home, text: "Home"),
+                GButton(icon: Icons.add_circle_outline, text: "Create"),
+                GButton(icon: Icons.local_post_office_outlined, text: "Inbox"),
+                GButton(icon: Icons.person, text: "Profile"),
+              ],
+            ),
           ),
         ),
       ),

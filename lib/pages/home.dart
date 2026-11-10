@@ -22,8 +22,9 @@ Future<List<Product>> loadProducts() async {
       .from('products')
       .select(
         'name, description, category, subcategory, last_location, '
-        'image1_url, image2_url, user_name',
-      );
+        'image1_url, image2_url, user_name, is_found', // 1. Include column in select
+      )
+      .eq('is_found', false); // 2. Filter rows where is_found is false
 
   return (rows as List).map((row) {
     final img1 = row['image1_url'] as String?;
@@ -44,7 +45,7 @@ Future<List<Product>> loadProducts() async {
       location: row['last_location'] as String? ?? 'n/a',
       imageUrl: urls.first,
       imageUrls: urls,
-      isFound: false,
+      isFound: row['is_found'] as bool? ?? false, // 3. Read value from row data
     );
   }).toList();
 }
@@ -126,9 +127,9 @@ class _HomeState extends State<Home> {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.security, color: Colors.deepPurple),
+            Icon(Icons.location_on, color: Colors.lightBlueAccent),
             SizedBox(width: 8),
-            Text("Campus Security"),
+            Expanded(child: Text("Box Location", maxLines: 2, softWrap: true)),
           ],
         ),
         content: const Column(
@@ -136,15 +137,11 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Central Lost & Found Office",
+              "Where to find the Lost and Found Box?",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 4),
-            Text("Location: SIRC Building, Room 102"),
-            SizedBox(height: 8),
-            Text("Emergency Phone: (905) 721-2000 ext. 2400"),
-            SizedBox(height: 4),
-            Text("Hours: Mon - Fri (8:00 AM - 6:00 PM)"),
+            Text("First floor of the library, near the scanner."),
           ],
         ),
         actions: [
@@ -164,7 +161,7 @@ class _HomeState extends State<Home> {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.help_outline, color: Colors.deepPurple),
+            Icon(Icons.help_outline, color: Colors.lightBlueAccent),
             SizedBox(width: 8),
             Text("Help & Guidelines"),
           ],
@@ -177,21 +174,23 @@ class _HomeState extends State<Home> {
               "1. Found an item?",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text("Post it on the Create page or drop it at Campus Security."),
+            Text(
+              "Post it on the Create page or drop it at lost and found box.",
+            ),
             SizedBox(height: 8),
             Text(
               "2. Lost an item?",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text("Search by location chips or keywords on the Home screen."),
+            Text(
+              "Search the campus lost and found box or search on the Home screen.",
+            ),
             SizedBox(height: 8),
             Text(
               "3. How to claim?",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(
-              "Message the finder or contact security with verification proof.",
-            ),
+            Text("Claim by conversing with the finder or admin"),
           ],
         ),
         actions: [
@@ -208,9 +207,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = Supabase.instance.client.auth.currentUser;
-    final userEmail = currentUser?.email ?? 'user@campus.edu';
-    final userUsername =
-        currentUser?.userMetadata?['username'] ?? 'Campus User';
+    final userEmail = currentUser?.email ?? 'Guest user';
+    final userUsername = currentUser?.userMetadata?['username'] ?? 'Guest';
 
     return Scaffold(
       appBar: AppBar(
@@ -218,13 +216,7 @@ class _HomeState extends State<Home> {
         actions: [
           // Toggle grid layout
           IconButton(
-            icon: Icon(
-              _crossAxisCount == 1
-                  ? Icons.grid_view
-                  : (_crossAxisCount == 2
-                        ? Icons.view_module
-                        : Icons.view_list),
-            ),
+            icon: Icon(Icons.view_column),
             onPressed: _updateCrossAxisCount,
             tooltip: 'Change Grid View',
           ),
@@ -247,11 +239,13 @@ class _HomeState extends State<Home> {
               accountEmail: Text(userEmail),
               currentAccountPicture: const CircleAvatar(
                 backgroundColor: Colors.white,
-                child: Icon(Icons.person, size: 36, color: Colors.deepPurple),
+                child: Icon(
+                  Icons.person,
+                  size: 36,
+                  color: Colors.lightBlueAccent,
+                ),
               ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              decoration: BoxDecoration(color: Colors.lightBlueAccent),
             ),
 
             // Dark Mode Toggle Switch
@@ -263,7 +257,7 @@ class _HomeState extends State<Home> {
                   title: const Text("Dark Mode"),
                   secondary: Icon(
                     isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                    color: isDarkMode ? Colors.amber : Colors.deepPurple,
+                    color: isDarkMode ? Colors.white : Colors.lightBlueAccent,
                   ),
                   value: isDarkMode,
                   onChanged: (bool value) {
@@ -278,9 +272,12 @@ class _HomeState extends State<Home> {
             const Divider(),
 
             ListTile(
-              leading: const Icon(Icons.security, color: Colors.deepPurple),
-              title: const Text("Campus Security"),
-              subtitle: const Text("Lost & found office info"),
+              leading: const Icon(
+                Icons.location_on,
+                color: Colors.lightBlueAccent,
+              ),
+              title: const Text("Location"),
+              subtitle: const Text("Where to pick up lost items"),
               onTap: () {
                 Navigator.pop(context);
                 _showCampusSecurityDialog(context);
@@ -288,7 +285,10 @@ class _HomeState extends State<Home> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.help_outline, color: Colors.deepPurple),
+              leading: const Icon(
+                Icons.help_outline,
+                color: Colors.lightBlueAccent,
+              ),
               title: const Text("Help & Guidelines"),
               subtitle: const Text("How to report & claim items"),
               onTap: () {
@@ -297,43 +297,53 @@ class _HomeState extends State<Home> {
               },
             ),
 
-            ListTile(
-              leading: const Icon(
-                Icons.settings_outlined,
-                color: Colors.deepPurple,
+            if (currentUser == null) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.login, color: Colors.lightBlueAccent),
+                title: const Text('Sign In'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/login');
+                },
               ),
-              title: const Text("Profile Settings"),
-              onTap: () async {
-                Navigator.pop(context);
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Settings()),
-                );
-                if (mounted) {
-                  setState(() {});
-                }
-              },
-            ),
-
-            const Divider(),
-
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: const Text(
-                "Sign Out",
-                style: TextStyle(color: Colors.redAccent),
+            ] else ...[
+              ListTile(
+                leading: const Icon(
+                  Icons.settings_outlined,
+                  color: Colors.lightBlueAccent,
+                ),
+                title: const Text("Profile Settings"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Settings()),
+                  );
+                  if (mounted) {
+                    setState(() {});
+                  }
+                },
               ),
-              onTap: () async {
-                Navigator.pop(context);
-                await Supabase.instance.client.auth.signOut();
-                if (!context.mounted) return;
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login',
-                  (route) => false,
-                );
-              },
-            ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.redAccent),
+                title: const Text(
+                  "Sign Out",
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await Supabase.instance.client.auth.signOut();
+                  if (!context.mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login',
+                    (route) => false,
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),

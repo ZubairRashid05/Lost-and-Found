@@ -205,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                   TextButton(
                     onPressed: () => Navigator.pushNamedAndRemoveUntil(
                       context,
-                      '/homepage',
+                      '/home',
                       (route) => false,
                     ),
                     style: authLinkButtonStyle,
