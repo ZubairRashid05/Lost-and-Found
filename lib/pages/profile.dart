@@ -84,7 +84,8 @@ class _Profile extends State<Profile> {
     return Scaffold(
       appBar: AppBar(title: const Text("Your Profile")),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        // padding: const EdgeInsets.all(24),
         children: [
           // Profile User Info Card
           Container(
@@ -168,42 +169,43 @@ class _Profile extends State<Profile> {
                     ),
                   ),
                 )
-              : SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    spacing: 15,
-                    children: [
-                      for (var x in products)
-                        Stack(
-                          children: [
-                            ProductCard(product: x),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  const snackBar = SnackBar(
-                                    content: Text('Pressed edit'),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
+              : SafeArea(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      spacing: 15,
+                      children: [
+                        for (var x in products)
+                          Stack(
+                            children: [
+                              ProductCard(product: x),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    const snackBar = SnackBar(
+                                      content: Text('Pressed edit'),
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(snackBar);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 5,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Edit",
+                                    style: TextStyle(color: Colors.white),
                                   ),
                                 ),
-                                child: const Text(
-                                  "Edit",
-                                  style: TextStyle(color: Colors.white),
-                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      const SizedBox(height: 80),
-                    ],
+                            ],
+                          ),
+                      ],
+                    ),
                   ),
                 ),
         ],

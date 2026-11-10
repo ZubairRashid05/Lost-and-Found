@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_found/model/draft.dart';
@@ -100,6 +101,7 @@ class _Request extends State<Request> {
       subcategory: _selectedSubcategory,
       location: _selectedLocation,
       imagePath: selectedImage?.path,
+      imagePath2: selectedImage2?.path,
       updatedAt: DateTime.now(),
     );
 
@@ -109,9 +111,8 @@ class _Request extends State<Request> {
     _clearForm();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Draft saved.')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Draft saved.')));
   }
 
   // Opens the saved drafts page and restores selected draft fields
@@ -131,6 +132,10 @@ class _Request extends State<Request> {
       selectedImage =
           draft.imagePath != null && File(draft.imagePath!).existsSync()
           ? File(draft.imagePath!)
+          : null;
+      selectedImage2 =
+          draft.imagePath2 != null && File(draft.imagePath2!).existsSync()
+          ? File(draft.imagePath2!)
           : null;
     });
   }
@@ -217,9 +222,8 @@ class _Request extends State<Request> {
       _clearForm();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving post: $error')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error saving post: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -253,314 +257,204 @@ class _Request extends State<Request> {
         padding: const EdgeInsets.only(left: 20, right: 20, top: 12),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title Field
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Text("Title", style: TextStyle(fontSize: 18)),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    hintText: "What would you like to call this post?",
-                    prefixIcon: Icon(Icons.title),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title Field
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text("Title", style: TextStyle(fontSize: 18)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      hintText: "What would you like to call this post?",
+                      prefixIcon: Icon(Icons.title),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty || value.length < 3) {
+                        return 'Please enter a title of at least 3 characters';
+                      }
+                      return null;
+                    },
+                    maxLength: 30,
+                    onSaved: (value) {
+                      _postName = value;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty || value.length < 3) {
-                      return 'Please enter a title of at least 3 characters';
-                    }
-                    return null;
-                  },
-                  maxLength: 30,
-                  onSaved: (value) {
-                    _postName = value;
-                  },
                 ),
-              ),
 
-              // Description Field
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Text("Description", style: TextStyle(fontSize: 18)),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: TextFormField(
-                  controller: _descriptionController,
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(
-                    hintText: "Describe what you're looking for...",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                // Description Field
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text("Description", style: TextStyle(fontSize: 18)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: TextFormField(
+                    controller: _descriptionController,
+                    keyboardType: TextInputType.multiline,
+                    decoration: const InputDecoration(
+                      hintText: "Describe what you're looking for...",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
                     ),
+                    maxLines: 3,
+                    maxLength: 500,
+                    validator: (value) {
+                      if (value == null || value.isEmpty || value.length < 5) {
+                        return 'Please be more descriptive';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _postDescription = value;
+                    },
                   ),
-                  maxLines: 3,
-                  maxLength: 500,
-                  validator: (value) {
-                    if (value == null || value.isEmpty || value.length < 5) {
-                      return 'Please be more descriptive';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _postDescription = value;
-                  },
                 ),
-              ),
 
-              // Category & Subcategory
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Text(
-                  "Category & Subcategory",
-                  style: TextStyle(fontSize: 18),
+                // Category & Subcategory
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    "Category & Subcategory",
+                    style: TextStyle(fontSize: 18),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          initialValue: _selectedCategory,
+                          decoration: const InputDecoration(
+                            hintText: "Select a category",
+                            prefixIcon: Icon(Icons.category),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                          ),
+                          items: categories.keys.map((category) {
+                            return DropdownMenuItem<String>(
+                              value: category,
+                              child: Text(category),
+                            );
+                          }).toList(),
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select a category';
+                            }
+                            return null;
+                          },
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedCategory = value;
+                              _selectedSubcategory = null;
+                            });
+                            _formKey.currentState?.validate();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          key: ValueKey(_selectedCategory),
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            hintText: "Select a subcategory",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                          ),
+                          initialValue: _selectedSubcategory,
+                          items: (categories[_selectedCategory] ?? []).map((
+                            subcategory,
+                          ) {
+                            return DropdownMenuItem<String>(
+                              value: subcategory,
+                              child: Text(
+                                subcategory,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select a subcategory';
+                            }
+                            return null;
+                          },
+                          onChanged: _selectedCategory == null
+                              ? null
+                              : (value) {
+                                  setState(() {
+                                    _selectedSubcategory = value;
+                                  });
+                                },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Location Selection
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    "Last Known Location",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _selectedLocation,
+                    decoration: const InputDecoration(
+                      hintText: "Location",
+                      prefixIcon: Icon(Icons.location_on_rounded),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                    ),
+                    items: locations.map((location) {
+                      return DropdownMenuItem<String>(
+                        value: location,
+                        child: Text(location),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedLocation = newValue;
+                      });
+                    },
+                  ),
+                ),
+
+                // Photos row
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text("Upload Image", style: TextStyle(fontSize: 18)),
+                ),
+                Row(
                   children: [
+                    // First Image
                     Expanded(
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        initialValue: _selectedCategory,
-                        decoration: const InputDecoration(
-                          hintText: "Select a category",
-                          prefixIcon: Icon(Icons.category),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        items: categories.keys.map((category) {
-                          return DropdownMenuItem<String>(
-                            value: category,
-                            child: Text(category),
-                          );
-                        }).toList(),
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Please select a category';
-                          }
-                          return null;
-                        },
-                        onChanged: (String? value) {
-                          setState(() {
-                            _selectedCategory = value;
-                            _selectedSubcategory = null;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        key: ValueKey(_selectedCategory),
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          hintText: "Select a subcategory",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        initialValue: _selectedSubcategory,
-                        items: (categories[_selectedCategory] ?? []).map((
-                          subcategory,
-                        ) {
-                          return DropdownMenuItem<String>(
-                            value: subcategory,
-                            child: Text(
-                              subcategory,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Please select a subcategory';
-                          }
-                          return null;
-                        },
-                        onChanged: _selectedCategory == null
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _selectedSubcategory = value;
-                                });
-                              },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Location Selection
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Text(
-                  "Last Known Location",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: DropdownButtonFormField<String>(
-                  initialValue: _selectedLocation,
-                  decoration: const InputDecoration(
-                    hintText: "Location",
-                    prefixIcon: Icon(Icons.location_on_rounded),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  items: locations.map((location) {
-                    return DropdownMenuItem<String>(
-                      value: location,
-                      child: Text(location),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedLocation = newValue;
-                    });
-                  },
-                ),
-              ),
-
-              // Photos row
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Text("Upload Image", style: TextStyle(fontSize: 18)),
-              ),
-              Row(
-                children: [
-                  // First Image
-                  Expanded(
-                    child: selectedImage == null
-                        ? InkWell(
-                            onTap: () => pickImage(isSecond: false),
-                            child: Container(
-                              height: 150,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.cloud_upload_outlined,
-                                    size: 35,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    "Upload an image",
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : Stack(
-                            children: [
-                              Container(
-                                height: 150,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(
-                                    selectedImage!,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 6,
-                                right: 6,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.black54,
-                                  radius: 16,
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        selectedImage = null;
-                                        selectedImage2 = null;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                  const SizedBox(width: 10),
-
-                  // Second Image
-                  Expanded(
-                    child: selectedImage2 != null
-                        ? Stack(
-                            children: [
-                              Container(
-                                height: 150,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(
-                                    selectedImage2!,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 6,
-                                right: 6,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.black54,
-                                  radius: 16,
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        selectedImage2 = null;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : InkWell(
-                            onTap: selectedImage != null
-                                ? () => pickImage(isSecond: true)
-                                : null,
-                            child: Opacity(
-                              opacity: selectedImage != null ? 1.0 : 0.4,
+                      child: selectedImage == null
+                          ? InkWell(
+                              onTap: () => pickImage(isSecond: false),
                               child: Container(
                                 height: 150,
                                 decoration: BoxDecoration(
@@ -577,46 +471,163 @@ class _Request extends State<Request> {
                                     ),
                                     SizedBox(height: 8),
                                     Text(
-                                      "Upload another image",
+                                      "Upload an image",
                                       textAlign: TextAlign.center,
                                     ),
                                   ],
                                 ),
                               ),
+                            )
+                          : Stack(
+                              children: [
+                                Container(
+                                  height: 150,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      selectedImage!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 6,
+                                  right: 6,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.black54,
+                                    radius: 16,
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          selectedImage = null;
+                                          selectedImage2 = null;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                  ),
-                ],
-              ),
-
-              // Post Submit Button
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10, top: 19),
-                child: Container(
-                  alignment: Alignment.center,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
+                    const SizedBox(width: 10),
+
+                    // Second Image
+                    Expanded(
+                      child: selectedImage2 != null
+                          ? Stack(
+                              children: [
+                                Container(
+                                  height: 150,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      selectedImage2!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 6,
+                                  right: 6,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.black54,
+                                    radius: 16,
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          selectedImage2 = null;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : InkWell(
+                              onTap: selectedImage != null
+                                  ? () => pickImage(isSecond: true)
+                                  : null,
+                              child: Opacity(
+                                opacity: selectedImage != null ? 1.0 : 0.4,
+                                child: Container(
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.cloud_upload_outlined,
+                                        size: 35,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        "Upload another image",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                          )
-                        : const Text(
-                            "Create Post",
-                            style: TextStyle(color: Colors.white),
-                          ),
+                    ),
+                  ],
+                ),
+
+                // Post Submit Button
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10, top: 19),
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              "Create Post",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 150),
-            ],
+                // const SizedBox(height: 150),
+              ],
+            ),
           ),
         ),
       ),

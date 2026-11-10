@@ -17,7 +17,10 @@ class _ProductPopUpState extends State<ProductPopUp> {
 
   // Opens full-screen image viewer
   void _openFullscreenViewer(
-      BuildContext context, List<String> imageUrls, int initialIndex) {
+    BuildContext context,
+    List<String> imageUrls,
+    int initialIndex,
+  ) {
     final pageController = PageController(initialPage: initialIndex);
 
     showDialog(
@@ -170,16 +173,14 @@ class _ProductPopUpState extends State<ProductPopUp> {
                               ? Image.network(
                                   url,
                                   fit: BoxFit.cover,
-                                  errorBuilder:
-                                      (context, error, stackTrace) =>
-                                          _imageError(),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _imageError(),
                                 )
                               : Image.asset(
                                   url,
                                   fit: BoxFit.cover,
-                                  errorBuilder:
-                                      (context, error, stackTrace) =>
-                                          _imageError(),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _imageError(),
                                 );
 
                           return GestureDetector(
@@ -281,7 +282,10 @@ class _ProductPopUpState extends State<ProductPopUp> {
                         Expanded(
                           child: Row(
                             children: [
-                              const Icon(Icons.account_circle_outlined, size: 20),
+                              const Icon(
+                                Icons.account_circle_outlined,
+                                size: 20,
+                              ),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
@@ -299,15 +303,17 @@ class _ProductPopUpState extends State<ProductPopUp> {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Chip(
-                          label: Text(widget.product.isFound ? "Found" : "Lost"),
-                          backgroundColor: widget.product.isFound
-                              ? Colors.green.shade100
-                              : Colors.red.shade100,
-                          side: BorderSide.none,
-                          visualDensity: VisualDensity.compact,
-                        ),
+                        // const SizedBox(width: 8),
+                        // Chip(
+                        //   label: Text(
+                        //     widget.product.isFound ? "Found" : "Contact",
+                        //   ),
+                        //   backgroundColor: widget.product.isFound
+                        //       ? Colors.green.shade100
+                        //       : Colors.red.shade100,
+                        //   side: BorderSide.none,
+                        //   visualDensity: VisualDensity.compact,
+                        // ),
                       ],
                     ),
                     const Divider(height: 24),
@@ -356,7 +362,6 @@ class _ProductPopUpState extends State<ProductPopUp> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black54,
                             ),
                           ),
                           const SizedBox(height: 6),

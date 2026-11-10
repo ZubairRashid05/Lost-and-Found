@@ -14,6 +14,7 @@ class RequestDraft {
     this.subcategory,
     this.location,
     this.imagePath,
+    this.imagePath2,
     required this.updatedAt,
   });
 
@@ -25,6 +26,7 @@ class RequestDraft {
   final String? subcategory;
   final String? location;
   final String? imagePath;
+  final String? imagePath2;
   final DateTime updatedAt;
 
   // Function to convert to JSON
@@ -36,6 +38,7 @@ class RequestDraft {
     'subcategory': subcategory,
     'location': location,
     'imagePath': imagePath,
+    'imagePath2': imagePath2,
     'updatedAt': updatedAt.toIso8601String(),
   };
 
@@ -48,6 +51,7 @@ class RequestDraft {
     subcategory: json['subcategory'] as String?,
     location: json['location'] as String?,
     imagePath: json['imagePath'] as String?,
+    imagePath2: json['imagePath2'] as String?,
     updatedAt:
         DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
         DateTime.fromMillisecondsSinceEpoch(0),

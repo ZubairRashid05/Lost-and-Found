@@ -61,6 +61,7 @@ class _HomeState extends State<Home> {
   String _selectedLocation = 'All';
 
   final List<String> _locations = [
+    'All',
     'Library',
     'Business Building',
     'Science Building',
@@ -154,7 +155,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /// Displays dialog with app guidelines.
+  // Displays dialog with app guidelines.
   void _showHelpFaqDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -409,56 +410,58 @@ class _HomeState extends State<Home> {
             const SizedBox(height: 8),
 
             // Products Grid
-            _filteredProducts.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(40.0),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.search_off_rounded,
-                            size: 60,
-                            color: isDark
-                                ? Colors.white38
-                                : Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "No matching items found",
-                            style: TextStyle(
-                              fontSize: 16,
+            SafeArea(
+              child: _filteredProducts.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 60,
                               color: isDark
-                                  ? Colors.white70
-                                  : Colors.grey.shade600,
+                                  ? Colors.white38
+                                  : Colors.grey.shade400,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 12),
+                            Text(
+                              "No matching items found",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isDark
+                                    ? Colors.white70
+                                    : Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _filteredProducts.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _crossAxisCount,
+                          crossAxisSpacing: 12.0,
+                          mainAxisSpacing: 12.0,
+                          childAspectRatio: _crossAxisCount == 1
+                              ? 2.1
+                              : (_crossAxisCount == 2 ? 0.78 : 0.65),
+                        ),
+                        itemBuilder: (context, index) {
+                          final product = _filteredProducts[index];
+                          return GestureDetector(
+                            onTap: () => showProductDetails(product),
+                            child: ProductCard(product: product),
+                          );
+                        },
                       ),
                     ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _filteredProducts.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: _crossAxisCount,
-                        crossAxisSpacing: 12.0,
-                        mainAxisSpacing: 12.0,
-                        childAspectRatio: _crossAxisCount == 1
-                            ? 2.1
-                            : (_crossAxisCount == 2 ? 0.78 : 0.65),
-                      ),
-                      itemBuilder: (context, index) {
-                        final product = _filteredProducts[index];
-                        return GestureDetector(
-                          onTap: () => showProductDetails(product),
-                          child: ProductCard(product: product),
-                        );
-                      },
-                    ),
-                  ),
+            ),
           ],
         ),
       ),

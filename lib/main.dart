@@ -79,6 +79,6 @@ class AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = Supabase.instance.client.auth.currentSession;
-    return session == null ? const Home() : const NavBar();
+    return session == null ? const LoginPage() : const NavBar();
   }
 }
