@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:lost_and_found/pages/home.dart';
 import 'package:lost_and_found/pages/login.dart';
 import 'package:lost_and_found/widgets/navbar.dart';
 import 'package:lost_and_found/pages/draft.dart';
@@ -17,8 +19,14 @@ Future<void> main() async {
     publishableKey: 'sb_publishable_SX0tAi9EkrbSaHEf1nyl9w_VLXVQbiR',
   );
 
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Than we setup preferred orientations,
+  // and only after it finished we run our app
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(MyApp()));
 }
+// runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,14 +43,16 @@ class MyApp extends StatelessWidget {
           themeMode: currentMode,
           // Light Mode Theme
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.lightBlueAccent,
+            ),
             useMaterial3: true,
             fontFamily: 'HelveticaNeue',
           ),
           // Dark Mode Theme
           darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
+              seedColor: Colors.blueAccent,
               brightness: Brightness.dark,
             ),
             useMaterial3: true,
@@ -50,9 +60,10 @@ class MyApp extends StatelessWidget {
           ),
           home: const AuthGate(),
           routes: {
+            '/home': (context) => const Home(),
             '/login': (context) => const LoginPage(),
             '/signup': (context) => const SignupPage(),
-            '/homepage': (context) => const HomePage(),
+            '/homepage': (context) => const NavBar(),
             '/drafts': (context) => const DraftPage(),
           },
         );
@@ -68,6 +79,6 @@ class AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = Supabase.instance.client.auth.currentSession;
-    return session == null ? const LoginPage() : const HomePage();
+    return session == null ? const Home() : const NavBar();
   }
 }

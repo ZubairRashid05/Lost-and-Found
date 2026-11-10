@@ -21,7 +21,7 @@ Future<List<Product>> loadProducts() async {
       .from('products')
       .select(
         'name, description, category, subcategory, last_location, '
-        'image1_url, image2_url, user_name',
+        'image1_url, image2_url, user_name, is_found',
       )
       .eq('user_id', currentUser.id);
 
@@ -38,7 +38,7 @@ Future<List<Product>> loadProducts() async {
       imageUrl: imageUrl?.isNotEmpty == true
           ? imageUrl!
           : 'lib/assets/images/images.jpeg',
-      isFound: false,
+      isFound: row['is_found'] as bool? ?? false,
     );
   }).toList();
 }

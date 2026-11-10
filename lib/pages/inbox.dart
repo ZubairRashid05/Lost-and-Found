@@ -10,7 +10,11 @@ class Inbox extends StatefulWidget {
 class _InboxState extends State<Inbox> {
   // List holding messages
   final List<Map<String, String>> _messages = [
-    {"to": "test@example.com", "subject": "Welcome!", "body": "This is a placeholder message."},
+    {
+      "to": "test@example.com",
+      "subject": "Welcome!",
+      "body": "This is a placeholder message.",
+    },
   ];
 
   // Function to display the compose message
@@ -37,7 +41,10 @@ class _InboxState extends State<Inbox> {
             children: [
               // Window Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade50,
                   borderRadius: const BorderRadius.only(
@@ -116,14 +123,18 @@ class _InboxState extends State<Inbox> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
                       ),
                       onPressed: () {
                         // Append the new message to the messages list
-                        if (toController.text.isNotEmpty || subjectController.text.isNotEmpty) {
+                        if (toController.text.isNotEmpty ||
+                            subjectController.text.isNotEmpty) {
                           setState(() {
                             _messages.add({
                               "to": toController.text,
@@ -139,7 +150,10 @@ class _InboxState extends State<Inbox> {
 
                     // Discard Button
                     IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.black54),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.black54,
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -156,21 +170,26 @@ class _InboxState extends State<Inbox> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
-            const Padding(
-              padding: EdgeInsets.only(left: 24.0, top: 24.0, bottom: 16.0),
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 24.0,
+                top: 24.0,
+                bottom: 16.0,
+              ),
               child: Text(
                 "Inbox",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ),
@@ -190,28 +209,48 @@ class _InboxState extends State<Inbox> {
                       padding: const EdgeInsets.all(16),
                       margin: const EdgeInsets.only(bottom: 16.0),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: isDark
+                            ? Colors.grey.shade900
+                            : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.grey.shade500
+                              : Colors.grey.shade300,
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            message["subject"]!.isEmpty ? "(No Subject)" : message["subject"]!,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            message["subject"]!.isEmpty
+                                ? "(No Subject)"
+                                : message["subject"]!,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             "To: ${message["to"]!}",
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.grey.shade300
+                                  : Colors.grey,
+                              fontSize: 12,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             message["body"]!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Colors.black87),
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.grey.shade100
+                                  : Colors.black87,
+                            ),
                           ),
                         ],
                       ),
@@ -231,7 +270,11 @@ class _InboxState extends State<Inbox> {
           onPressed: _openComposeMessage,
           backgroundColor: Colors.blue,
           elevation: 2,
-          child: const Icon(Icons.add, color: Colors.white, size: 30),
+          child: Icon(
+            Icons.add,
+            color: isDark ? Colors.grey.shade900 : Colors.white,
+            size: 30,
+          ),
         ),
       ),
     );

@@ -63,42 +63,36 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: product.isFound ? Colors.green : Colors.redAccent,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      product.isFound
-                          ? Icons.check_circle
-                          : Icons.error_outline,
-                      color: Colors.white,
-                      size: 13,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      product.isFound ? 'FOUND' : 'LOST',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+            if (product.isFound)
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white, size: 13),
+                      const SizedBox(width: 4),
+                      Text(
+                        'FOUND',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-
             // Title, description and location
             Align(
               alignment: Alignment.bottomLeft,
