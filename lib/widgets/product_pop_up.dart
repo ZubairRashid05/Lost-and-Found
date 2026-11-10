@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/product.dart';
 
+// Display full item details
 class ProductPopUp extends StatefulWidget {
   final Product product;
 
@@ -11,8 +12,10 @@ class ProductPopUp extends StatefulWidget {
 }
 
 class _ProductPopUpState extends State<ProductPopUp> {
+  // Current image index
   int _activePageIndex = 0;
 
+  // Opens full-screen image viewer
   void _openFullscreenViewer(
       BuildContext context, List<String> imageUrls, int initialIndex) {
     final pageController = PageController(initialPage: initialIndex);
@@ -46,6 +49,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
               body: Stack(
                 alignment: Alignment.center,
                 children: [
+                  // Fullscreen PageView
                   PageView.builder(
                     controller: pageController,
                     itemCount: imageUrls.length,
@@ -79,6 +83,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
                       );
                     },
                   ),
+                  // Navigation Arrows for Multiple Images
                   if (imageUrls.length > 1) ...[
                     if (currentIndex > 0)
                       Positioned(
@@ -140,6 +145,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Top Image Header
               SizedBox(
                 height: 280,
                 child: ClipRRect(
@@ -204,6 +210,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
                         },
                       ),
 
+                      // Close Button
                       Positioned(
                         top: 8,
                         right: 8,
@@ -216,6 +223,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
                         ),
                       ),
 
+                      // Image Page Counter Badge
                       if (imageUrls.length > 1)
                         Positioned(
                           top: 12,
@@ -240,6 +248,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
                           ),
                         ),
 
+                      // Product Title
                       Positioned(
                         left: 20,
                         right: 80,
@@ -260,6 +269,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
                 ),
               ),
 
+              // Product information
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -368,6 +378,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
   }
 }
 
+// Placeholder error icon displayed when an image URL fails to load.
 Widget _imageError() {
   return Container(
     color: Colors.deepPurple.shade100,

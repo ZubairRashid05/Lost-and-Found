@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Settings page to update user information
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
@@ -9,6 +10,7 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  // Create the controllers for the text fields
   late final TextEditingController _usernameController;
   late final TextEditingController _emailController;
   final user = Supabase.instance.client.auth.currentUser;
@@ -30,6 +32,7 @@ class _SettingsState extends State<Settings> {
     super.dispose();
   }
 
+  // Save the changes to the users profile
   Future<void> _saveChanges() async {
     final newUsername = _usernameController.text.trim();
     if (newUsername.isEmpty) {
@@ -44,7 +47,7 @@ class _SettingsState extends State<Settings> {
     try {
       final supabase = Supabase.instance.client;
 
-      // Update Supabase Auth user metadata & database 'users' table
+      // Update the username in the users table
       final res = await supabase.auth.updateUser(
         UserAttributes(data: {'username': newUsername}),
       );
@@ -71,6 +74,7 @@ class _SettingsState extends State<Settings> {
     }
   }
 
+  // Show the page
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,6 +106,7 @@ class _SettingsState extends State<Settings> {
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
+                        // Changing the password isnt implemented yet
                         readOnly: true,
                         initialValue: "******",
                         decoration: const InputDecoration(
@@ -139,6 +144,7 @@ class _SettingsState extends State<Settings> {
                             const SizedBox(width: 15),
                             Expanded(
                               child: ElevatedButton(
+                                // logout button
                                 onPressed: () async {
                                   await Supabase.instance.client.auth.signOut();
 

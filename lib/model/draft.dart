@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Model for a draft request
 class RequestDraft {
   const RequestDraft({
+    // Required fields
     required this.id,
     required this.title,
     required this.description,
@@ -15,6 +17,7 @@ class RequestDraft {
     required this.updatedAt,
   });
 
+  // Variables
   final String id;
   final String title;
   final String description;
@@ -24,6 +27,7 @@ class RequestDraft {
   final String? imagePath;
   final DateTime updatedAt;
 
+  // Function to convert to JSON
   Map<String, dynamic> toJson() => {
     'id': id,
     'title': title,
@@ -35,6 +39,7 @@ class RequestDraft {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
+  // Function to convert from JSON
   factory RequestDraft.fromJson(Map<String, dynamic> json) => RequestDraft(
     id: json['id'] as String,
     title: json['title'] as String? ?? '',
@@ -49,14 +54,18 @@ class RequestDraft {
   );
 }
 
+// Storage for drafts
 class DraftStorage {
+  // Storage key for the user's drafts
   static String get _userStorageKey {
     final userId = Supabase.instance.client.auth.currentUser?.id ?? 'guest';
     return 'request_drafts_$userId';
   }
 
+  // Guest storage key
   static const _guestStorageKey = 'request_drafts_guest';
 
+  // Loading drafts
   static Future<List<RequestDraft>> load() async {
     final prefs = SharedPreferencesAsync();
     var raw = await prefs.getString(_userStorageKey);
@@ -66,8 +75,10 @@ class DraftStorage {
       raw = await prefs.getString(_guestStorageKey);
     }
 
+    // If there are no drafts, return an empty list
     if (raw == null || raw.isEmpty) return [];
 
+    // Convert the JSON string to a list of drafts
     final decoded = jsonDecode(raw) as List<dynamic>;
     final drafts = decoded
         .map((item) => RequestDraft.fromJson(item as Map<String, dynamic>))
@@ -76,6 +87,7 @@ class DraftStorage {
     return drafts;
   }
 
+  // Save a draft
   static Future<void> save(RequestDraft draft) async {
     final drafts = await load();
     final index = drafts.indexWhere((item) => item.id == draft.id);
@@ -85,6 +97,7 @@ class DraftStorage {
       drafts[index] = draft;
     }
 
+    // Save the drafts to local storage
     final prefs = SharedPreferencesAsync();
     await prefs.setString(
       _userStorageKey,
@@ -92,6 +105,7 @@ class DraftStorage {
     );
   }
 
+  // Delete a draft
   static Future<void> delete(String id) async {
     final drafts = await load();
     drafts.removeWhere((draft) => draft.id == id);

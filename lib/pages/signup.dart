@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Login page for the app
 const authTitleStyle = TextStyle(
   fontSize: 30,
   fontWeight: FontWeight.w700,
@@ -14,6 +15,7 @@ final authLinkButtonStyle = TextButton.styleFrom(
   textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
 );
 
+// Custom class for the login page
 class AuthField extends StatelessWidget {
   const AuthField({
     super.key,
@@ -104,6 +106,7 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
+  // Make sure the user signs up correctly
   Future<void> _handleSignup() async {
     final username = _usernameController.text.trim();
     final email = _emailController.text.trim();
@@ -130,14 +133,15 @@ class _SignupPageState extends State<SignupPage> {
           '/homepage',
           (route) => false,
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Check your email to confirm your account.'),
-          ),
-        );
-        Navigator.pop(context);
       }
+// else {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     const SnackBar(
+      //       content: Text('Check your email to confirm your account.'),
+      //     ),
+      //   );
+      //   Navigator.pop(context);
+      // }
     } on AuthException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -151,6 +155,7 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
+  // Show the page
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.white,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/product.dart';
 
+// Product grid card displaying a products information
 class ProductCard extends StatelessWidget {
   final Product product;
 
@@ -29,6 +30,7 @@ class ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
+            // Background Image
             Positioned.fill(
               child: isNetworkImage
                   ? Image.network(
@@ -46,6 +48,7 @@ class ProductCard extends StatelessWidget {
                       },
                     ),
             ),
+            // Gradient for Text Readability
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -95,6 +98,8 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Title, description and location
             Align(
               alignment: Alignment.bottomLeft,
               child: Padding(
@@ -156,6 +161,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
+  // Placeholder if image fails to load
   Widget _imageError() {
     return Container(
       color: Colors.deepPurple.shade100,

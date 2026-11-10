@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePage();
 }
-
+// Keep track of the page the user is on
 class _HomePage extends State<HomePage> {
   int _selectedPage = 0;
 
@@ -21,6 +21,7 @@ class _HomePage extends State<HomePage> {
     });
   }
 
+  // keep a list of the pages
   final List<Widget> _pages = [
     const Home(),
     const Request(),
@@ -30,6 +31,7 @@ class _HomePage extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // change the colors to match the current theme
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

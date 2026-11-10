@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../widgets/product_pop_up.dart';
 
+// Main home screen displaying posts, location filters, and search bar.
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -14,7 +15,9 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+// Asynchronously fetches all products
 Future<List<Product>> loadProducts() async {
+  // connect to supabase to grab all the products
   final rows = await Supabase.instance.client
       .from('products')
       .select(
@@ -26,6 +29,7 @@ Future<List<Product>> loadProducts() async {
     final img1 = row['image1_url'] as String?;
     final img2 = row['image2_url'] as String?;
 
+    // Collect all valid image URLs
     final List<String> urls = [];
     if (img1 != null && img1.trim().isNotEmpty) urls.add(img1);
     if (img2 != null && img2.trim().isNotEmpty) urls.add(img2);
@@ -46,18 +50,22 @@ Future<List<Product>> loadProducts() async {
 }
 
 class _HomeState extends State<Home> {
+  // list of products retrieved from Supabase.
   List<Product> _allProducts = [];
+
+  // Filtered list
   List<Product> _filteredProducts = [];
   int _crossAxisCount = 2;
   String _searchQuery = '';
   String _selectedLocation = 'All';
 
   final List<String> _locations = [
-    'All',
     'Library',
-    'SIRC',
     'Business Building',
     'Science Building',
+    'Energy & Research Building',
+    'SIRC',
+    'Shawenjigewining Hall',
     'Engineering Building',
     'Recreation Centre',
   ];
@@ -68,6 +76,7 @@ class _HomeState extends State<Home> {
     _loadData();
   }
 
+  // Load products and updates widget state.
   Future<void> _loadData() async {
     try {
       final loadedProducts = await loadProducts();
@@ -81,6 +90,7 @@ class _HomeState extends State<Home> {
     }
   }
 
+  // Filters products
   void _applyFilter() {
     setState(() {
       _filteredProducts = _allProducts.where((product) {
@@ -102,12 +112,14 @@ class _HomeState extends State<Home> {
     });
   }
 
+  // Change grid view layout
   void _updateCrossAxisCount() {
     setState(() {
       _crossAxisCount = (_crossAxisCount % 3) + 1;
     });
   }
 
+  // Displays dialog with contact details and office location
   void _showCampusSecurityDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -145,6 +157,7 @@ class _HomeState extends State<Home> {
     );
   }
 
+  /// Displays dialog with app guidelines.
   void _showHelpFaqDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -203,6 +216,7 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: const Text("Lost & Found"),
         actions: [
+          // Toggle grid layout
           IconButton(
             icon: Icon(
               _crossAxisCount == 1
@@ -216,6 +230,8 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
+
+      // Navigation Drawer
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -321,6 +337,7 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,6 +455,7 @@ class _HomeState extends State<Home> {
     );
   }
 
+  // Displays the details for the selected product
   void showProductDetails(Product product) {
     showDialog(
       context: context,

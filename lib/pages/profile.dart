@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/widgets/product_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// User profile screen showing current user details and user-created posts.
 class Profile extends StatefulWidget {
   const Profile({super.key});
 
@@ -13,6 +12,7 @@ class Profile extends StatefulWidget {
   State<Profile> createState() => _Profile();
 }
 
+// Fetch user's posts from Supabase
 Future<List<Product>> loadProducts() async {
   final currentUser = Supabase.instance.client.auth.currentUser;
   if (currentUser == null) return [];
@@ -78,13 +78,15 @@ class _Profile extends State<Profile> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = Supabase.instance.client.auth.currentUser;
     final userEmail = currentUser?.email ?? 'No email found';
-    final userUsername = currentUser?.userMetadata?['username'] ?? 'No username found';
+    final userUsername =
+        currentUser?.userMetadata?['username'] ?? 'No username found';
 
     return Scaffold(
       appBar: AppBar(title: const Text("Your Profile")),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
+          // Profile User Info Card
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -93,9 +95,9 @@ class _Profile extends State<Profile> {
             ),
             child: Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 20,
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.lightBlueAccent.shade700,
                   child: Icon(Icons.person, size: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 16),
@@ -154,56 +156,56 @@ class _Profile extends State<Profile> {
                   child: Center(child: CircularProgressIndicator()),
                 )
               : products.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Center(
-                        child: Text(
-                          "You haven't posted any items yet.",
-                          style: TextStyle(
-                            color: isDark ? Colors.white60 : Colors.black54,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Column(
-                        spacing: 15,
-                        children: [
-                          for (var x in products)
-                            Stack(
-                              children: [
-                                ProductCard(product: x),
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      const snackBar = SnackBar(
-                                        content: Text('Pressed edit'),
-                                      );
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(snackBar);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      "Edit",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          const SizedBox(height: 80),
-                        ],
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: Text(
+                      "You haven't posted any items yet.",
+                      style: TextStyle(
+                        color: isDark ? Colors.white60 : Colors.black54,
+                        fontSize: 15,
                       ),
                     ),
+                  ),
+                )
+              : SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    spacing: 15,
+                    children: [
+                      for (var x in products)
+                        Stack(
+                          children: [
+                            ProductCard(product: x),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  const snackBar = SnackBar(
+                                    content: Text('Pressed edit'),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Edit",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
         ],
       ),
     );

@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart';
-
 import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_found/model/draft.dart';
 import 'package:lost_and_found/pages/draft.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Form screen allowing users to create posts
 class Request extends StatefulWidget {
   const Request({super.key});
 
@@ -15,7 +14,9 @@ class Request extends StatefulWidget {
 }
 
 class _Request extends State<Request> {
+  // Supabase backend database and storage client.
   final supabase = Supabase.instance.client;
+
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -30,6 +31,7 @@ class _Request extends State<Request> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  // Categories map with item subcategories.
   final Map<String, List<String>> categories = {
     "Electronics": ["Phone", "Laptop", "Headphones", "Other"],
     "Clothing": ["Shirt", "Jacket", "Pants", "Shoes", "Other"],
@@ -39,13 +41,14 @@ class _Request extends State<Request> {
     "Other": ["Other"],
   };
 
+  // List of campus buildings and last known locations.
   final List<String> locations = [
     'Library',
     'Business Building',
     'Science Building',
     'Energy & Research Building',
     'SIRC',
-    'Sha Hall',
+    'Shawenjigewining Hall',
     'Engineering Building',
     'Recreation Centre',
   ];
@@ -57,6 +60,7 @@ class _Request extends State<Request> {
     super.dispose();
   }
 
+  // Reset all form fields
   void _clearForm() {
     setState(() {
       _nameController.clear();
@@ -70,6 +74,7 @@ class _Request extends State<Request> {
     _formKey.currentState?.reset();
   }
 
+  // Saves current unsubmitted inputs as a local draft onto local storage
   Future<void> _saveDraft() async {
     final title = _nameController.text.trim();
     final description = _descriptionController.text.trim();
@@ -104,10 +109,12 @@ class _Request extends State<Request> {
     _clearForm();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Draft saved.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Draft saved.')),
+    );
   }
 
+  // Opens the saved drafts page and restores selected draft fields
   Future<void> _openDrafts() async {
     final draft = await Navigator.push<RequestDraft>(
       context,
@@ -128,9 +135,9 @@ class _Request extends State<Request> {
     });
   }
 
+  // Launches gallery picker to select a photo file.
   Future<void> pickImage({bool isSecond = false}) async {
     final ImagePicker picker = ImagePicker();
-
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
@@ -144,19 +151,19 @@ class _Request extends State<Request> {
     }
   }
 
+  // Upload selected image to Supabase and returns its public URL.
   Future<String> uploadImage(File image) async {
     final fileName =
         '${DateTime.now().microsecondsSinceEpoch}_${image.uri.pathSegments.last}';
-
     final path = 'posts/$fileName';
 
     await supabase.storage.from('post_images').upload(path, image);
-
     final imageUrl = supabase.storage.from('post_images').getPublicUrl(path);
 
     return imageUrl;
   }
 
+  // Saves post to database
   Future<void> savePost() async {
     // Upload images if they exist
     String? image1Url;
@@ -188,6 +195,7 @@ class _Request extends State<Request> {
     await supabase.from('products').insert(postData);
   }
 
+  // Validates form inputs, uploads photos, publishes post, and clears inputs.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -209,8 +217,9 @@ class _Request extends State<Request> {
       _clearForm();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error saving post: $error')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving post: $error')),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -226,11 +235,13 @@ class _Request extends State<Request> {
       appBar: AppBar(
         title: const Text("Create Post"),
         actions: [
+          // Save Draft
           IconButton(
             onPressed: _saveDraft,
             tooltip: 'Save draft',
             icon: const Icon(Icons.save_outlined),
           ),
+          // View Drafts
           IconButton(
             onPressed: _openDrafts,
             tooltip: 'Open drafts',
@@ -245,6 +256,7 @@ class _Request extends State<Request> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Title Field
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text("Title", style: TextStyle(fontSize: 18)),
@@ -260,7 +272,6 @@ class _Request extends State<Request> {
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   ),
-
                   validator: (value) {
                     if (value == null || value.isEmpty || value.length < 3) {
                       return 'Please enter a title of at least 3 characters';
@@ -268,18 +279,17 @@ class _Request extends State<Request> {
                     return null;
                   },
                   maxLength: 30,
-
                   onSaved: (value) {
                     _postName = value;
                   },
                 ),
               ),
 
+              // Description Field
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text("Description", style: TextStyle(fontSize: 18)),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: TextFormField(
@@ -287,26 +297,25 @@ class _Request extends State<Request> {
                   keyboardType: TextInputType.multiline,
                   decoration: const InputDecoration(
                     hintText: "Describe what you're looking for...",
-                    // prefixIcon: Icon(Icons.description),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   ),
                   maxLines: 3,
                   maxLength: 500,
-
                   validator: (value) {
                     if (value == null || value.isEmpty || value.length < 5) {
                       return 'Please be more descriptive';
                     }
                     return null;
                   },
-
                   onSaved: (value) {
                     _postDescription = value;
                   },
                 ),
               ),
+
+              // Category & Subcategory
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text(
@@ -314,7 +323,6 @@ class _Request extends State<Request> {
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
@@ -330,21 +338,18 @@ class _Request extends State<Request> {
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                         ),
-
                         items: categories.keys.map((category) {
                           return DropdownMenuItem<String>(
                             value: category,
                             child: Text(category),
                           );
                         }).toList(),
-
                         validator: (value) {
                           if (value == null) {
                             return 'Please select a category';
                           }
                           return null;
                         },
-
                         onChanged: (String? value) {
                           setState(() {
                             _selectedCategory = value;
@@ -353,14 +358,7 @@ class _Request extends State<Request> {
                         },
                       ),
                     ),
-
-                    Padding(
-                      padding: const EdgeInsetsGeometry.only(
-                        left: 10,
-                        right: 10,
-                      ),
-                    ),
-
+                    const SizedBox(width: 10),
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         key: ValueKey(_selectedCategory),
@@ -383,14 +381,12 @@ class _Request extends State<Request> {
                             ),
                           );
                         }).toList(),
-
                         validator: (value) {
                           if (value == null) {
                             return 'Please select a subcategory';
                           }
                           return null;
                         },
-
                         onChanged: _selectedCategory == null
                             ? null
                             : (value) {
@@ -403,6 +399,8 @@ class _Request extends State<Request> {
                   ],
                 ),
               ),
+
+              // Location Selection
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text(
@@ -410,7 +408,6 @@ class _Request extends State<Request> {
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: DropdownButtonFormField<String>(
@@ -422,14 +419,12 @@ class _Request extends State<Request> {
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   ),
-
                   items: locations.map((location) {
                     return DropdownMenuItem<String>(
                       value: location,
                       child: Text(location),
                     );
                   }).toList(),
-
                   onChanged: (String? newValue) {
                     setState(() {
                       _selectedLocation = newValue;
@@ -437,13 +432,15 @@ class _Request extends State<Request> {
                   },
                 ),
               ),
+
+              // Photos row
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text("Upload Image", style: TextStyle(fontSize: 18)),
               ),
-
               Row(
                 children: [
+                  // First Image
                   Expanded(
                     child: selectedImage == null
                         ? InkWell(
@@ -514,6 +511,8 @@ class _Request extends State<Request> {
                           ),
                   ),
                   const SizedBox(width: 10),
+
+                  // Second Image
                   Expanded(
                     child: selectedImage2 != null
                         ? Stack(
@@ -590,6 +589,7 @@ class _Request extends State<Request> {
                 ],
               ),
 
+              // Post Submit Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 10, top: 19),
                 child: Container(

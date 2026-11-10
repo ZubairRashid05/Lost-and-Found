@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Title font style for login and signup pages.
 const authTitleStyle = TextStyle(
   fontSize: 30,
   fontWeight: FontWeight.w700,
   color: Color(0xFF26384C),
 );
+
 const authMutedColor = Color(0xFFD1D7DF);
 const authAccentColor = Color(0xFF71C9ED);
 final authLinkButtonStyle = TextButton.styleFrom(
@@ -14,6 +16,7 @@ final authLinkButtonStyle = TextButton.styleFrom(
   textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
 );
 
+// Reusable styled form input text field
 class AuthField extends StatelessWidget {
   const AuthField({
     super.key,
@@ -24,6 +27,7 @@ class AuthField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
   });
+
   final String label;
   final String hint;
   final TextEditingController controller;
@@ -56,12 +60,14 @@ class AuthField extends StatelessWidget {
   );
 }
 
+// Primary submit button for login and signup pages.
 class AuthPrimaryButton extends StatelessWidget {
   const AuthPrimaryButton({
     super.key,
     required this.label,
     required this.onPressed,
   });
+
   final String label;
   final VoidCallback onPressed;
 
@@ -84,8 +90,10 @@ class AuthPrimaryButton extends StatelessWidget {
   );
 }
 
+// Login page uses Supabase to authenticate user with email and password.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -102,8 +110,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // Supabase authentication client instance.
   final supabase = Supabase.instance.client;
 
+  // Authenticates user against Supabase using entered credentials.
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -132,6 +142,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Build the page
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.white,

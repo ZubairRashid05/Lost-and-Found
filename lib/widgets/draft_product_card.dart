@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/draft.dart';
 
+// Draft widget to show the users drafts in the draft menu
 class DraftProductCard extends StatelessWidget {
   const DraftProductCard({
     super.key,
@@ -21,6 +22,7 @@ class DraftProductCard extends StatelessWidget {
         draft.imagePath != null && File(draft.imagePath!).existsSync();
 
     return Card(
+      // Get the draft info and fill in the card
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         contentPadding: const EdgeInsets.all(10),
