@@ -174,43 +174,34 @@ class _InboxState extends State<Inbox> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Inbox"),
+        actions: [
+          // Compose Button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: _openComposeMessage,
+              child: Icon(
+                Icons.add,
+                color: isDark ? Colors.grey.shade900 : Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+        ]
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Inbox",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  // Compose Button
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    onPressed: _openComposeMessage,
-                    child: Icon(
-                      Icons.add,
-                      color: isDark ? Colors.grey.shade900 : Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
+            SizedBox(height: 10),
             // Scrollable Content Region
             Expanded(
               child: Scrollbar(
