@@ -4,36 +4,36 @@ A modern, full-featured Flutter mobile application designed for Ontario Tech Uni
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 🔍 Home Feed & Campus Search
+### Home Feed & Campus Search
 * **Dynamic Grid Layout**: Toggle between 1-column list view, 2-column grid, and 3-column compact grid.
 * **Instant Search**: Live keyword search across item titles and descriptions.
 * **Campus Building Filters**: Filter items by campus locations (*Library, SIRC, Business Building, Science Building, Engineering Building, Recreation Centre, Sha Hall*).
-* **Status Badges**: Clear visual badges demarcating `LOST` vs `FOUND` items.
+* **Status Badges**: Clear visual badges indicating if an item was `FOUND`.
 
-### 🖼️ Interactive Product Details & Fullscreen Media
+### Interactive Product Details & Fullscreen Media
 * **Multi-Image Carousel Slider**: Swipe through multiple photos per item with active page indicator badges.
 * **Pinch-to-Zoom Fullscreen Viewer**: Tap any photo to launch an interactive, full-screen viewer with `InteractiveViewer` pinch zoom and swipe controls.
 * **Finder & Location Info**: View poster details, location tags, category subcategories, and full descriptions.
 
-### 📝 Create Posts & Draft Management
+### Create Posts & Draft Management
 * **Post Form Validation**: Input fields for Title, Description, Category/Subcategory, and Campus Location.
 * **Multi-Photo Attachments**: Attach and preview images with deletion controls before publishing to Supabase Storage.
 * **Offline Drafts**: Save draft posts locally using `shared_preferences`. Prevents empty drafts, auto-clears on save, and allows restoring saved drafts anytime.
 
-### 🌙 Dark Mode & Navigation Drawer
+### Dark Mode & Navigation Drawer
 * **Global Dark Mode**: Dynamic dark/light mode toggle switch powered by `ValueNotifier<ThemeMode>`.
-* **Campus Security Hub**: Dialog displaying Central Lost & Found office location (SIRC 102), emergency phone numbers, and operating hours.
+* **Campus Location Hub**: Dialog displaying Central Lost & Found box location.
 * **Help & Guidelines**: FAQ dialog with step-by-step instructions on reporting and claiming items.
 * **User Drawer Header**: Displays current account username and email address.
 
-### 👤 Profile & Account Settings
+### Profile & Account Settings
 * **User Profile**: View account details and list of user-created posts.
-* **Username Updates**: Edit and sync account username with Supabase authentication user metadata and database records.
+* **Username & Email Updates**: Edit and sync account username and email with Supabase authentication user metadata and database records.
 
-### 💬 Messaging Inbox
-* **Campus Inbox**: Chat interface with unread message badges to connect item finders with owners.
+### Messaging Inbox
+* Work in progress
 
 ---
 
