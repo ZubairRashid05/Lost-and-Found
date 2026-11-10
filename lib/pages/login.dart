@@ -209,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                       (route) => false,
                     ),
                     style: authLinkButtonStyle,
-                    child: const Text('\nContinue as guest'),
+                    child: const Text('Continue as guest'),
                   ),
                 ],
               ),

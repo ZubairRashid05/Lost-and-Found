@@ -117,51 +117,56 @@ class _InboxState extends State<Inbox> {
                 height: 1,
                 color: isDark ? Colors.grey.shade700 : Colors.grey,
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Send Button
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: isDark
-                            ? Colors.grey.shade900
-                            : Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Send Button
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: isDark
+                              ? Colors.grey.shade900
+                              : Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                        onPressed: () {
+                          // Append the new message to the messages list
+                          if (toController.text.isNotEmpty ||
+                              subjectController.text.isNotEmpty) {
+                            setState(() {
+                              _messages.add({
+                                "to": toController.text,
+                                "subject": subjectController.text,
+                                "body": bodyController.text,
+                              });
+                            });
+                          }
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          "Send",
+                          style: TextStyle(fontSize: 16),
                         ),
                       ),
-                      onPressed: () {
-                        // Append the new message to the messages list
-                        if (toController.text.isNotEmpty ||
-                            subjectController.text.isNotEmpty) {
-                          setState(() {
-                            _messages.add({
-                              "to": toController.text,
-                              "subject": subjectController.text,
-                              "body": bodyController.text,
-                            });
-                          });
-                        }
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Send", style: TextStyle(fontSize: 16)),
-                    ),
 
-                    // Discard Button
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
+                      // Discard Button
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -195,7 +200,7 @@ class _InboxState extends State<Inbox> {
               ),
             ),
           ),
-        ]
+        ],
       ),
       body: SafeArea(
         child: Column(
