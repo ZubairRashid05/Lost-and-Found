@@ -8,6 +8,8 @@ class Inbox extends StatefulWidget {
 }
 
 class _InboxState extends State<Inbox> {
+  late final isDark = Theme.of(context).brightness == Brightness.dark;
+
   // List holding messages
   final List<Map<String, String>> _messages = [
     {
@@ -30,9 +32,9 @@ class _InboxState extends State<Inbox> {
       builder: (BuildContext context) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.85,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: isDark ? Colors.black87 : Colors.white,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
             ),
@@ -46,7 +48,7 @@ class _InboxState extends State<Inbox> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: isDark ? Colors.grey.shade700 : Colors.blue.shade50,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
@@ -60,7 +62,6 @@ class _InboxState extends State<Inbox> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
                       ),
                     ),
                     IconButton(
@@ -112,7 +113,10 @@ class _InboxState extends State<Inbox> {
               ),
 
               // Bottom Action Bar
-              Divider(height: 1, color: Colors.grey.shade300),
+              Divider(
+                height: 1,
+                color: isDark ? Colors.grey.shade700 : Colors.grey,
+              ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -122,7 +126,9 @@ class _InboxState extends State<Inbox> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                        foregroundColor: isDark
+                            ? Colors.grey.shade900
+                            : Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
                           vertical: 12,
@@ -150,10 +156,7 @@ class _InboxState extends State<Inbox> {
 
                     // Discard Button
                     IconButton(
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: Colors.black54,
-                      ),
+                      icon: const Icon(Icons.delete_outline),
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -170,27 +173,41 @@ class _InboxState extends State<Inbox> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
             Padding(
-              padding: const EdgeInsets.only(
-                left: 24.0,
-                top: 24.0,
-                bottom: 16.0,
-              ),
-              child: Text(
-                "Inbox",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Inbox",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  // Compose Button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: _openComposeMessage,
+                    child: Icon(
+                      Icons.add,
+                      color: isDark ? Colors.grey.shade900 : Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -246,11 +263,6 @@ class _InboxState extends State<Inbox> {
                             message["body"]!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.grey.shade100
-                                  : Colors.black87,
-                            ),
                           ),
                         ],
                       ),
@@ -260,21 +272,6 @@ class _InboxState extends State<Inbox> {
               ),
             ),
           ],
-        ),
-      ),
-
-      // Compose Letter Button
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80.0),
-        child: FloatingActionButton(
-          onPressed: _openComposeMessage,
-          backgroundColor: Colors.blue,
-          elevation: 2,
-          child: Icon(
-            Icons.add,
-            color: isDark ? Colors.grey.shade900 : Colors.white,
-            size: 30,
-          ),
         ),
       ),
     );
