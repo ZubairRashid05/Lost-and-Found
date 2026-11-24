@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/pages/chat_page.dart';
+import 'package:lost_and_found/services/user_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Inbox extends StatefulWidget {
   const Inbox({super.key});
@@ -8,268 +11,134 @@ class Inbox extends StatefulWidget {
 }
 
 class _InboxState extends State<Inbox> {
-  late final isDark = Theme.of(context).brightness == Brightness.dark;
+  final _supabase = Supabase.instance.client;
+  List<Map<String, dynamic>> _conversations = [];
+  RealtimeChannel? _conversationChannel;
+  bool _isLoading = true;
 
-  // List holding messages
-  final List<Map<String, String>> _messages = [
-    {
-      "to": "test@example.com",
-      "subject": "Welcome!",
-      "body": "This is a placeholder message.",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+    _subscribeToConversations();
+  }
 
-  // Function to display the compose message
-  void _openComposeMessage() {
-    final TextEditingController toController = TextEditingController();
-    final TextEditingController subjectController = TextEditingController();
-    final TextEditingController bodyController = TextEditingController();
+  Future<void> _loadConversations() async {
+    final user = UserService.currentUser;
+    if (user == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
-          decoration: BoxDecoration(
-            color: isDark ? Colors.black87 : Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-          ),
-          child: Column(
-            children: [
-              // Window Header
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey.shade700 : Colors.blue.shade50,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "New Message",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context), // Close window
-                    ),
-                  ],
-                ),
-              ),
+    try {
+      final rows = await _supabase
+          .from('conversations')
+          .select('id, product_id, user_one, user_two, created_at, updated_at')
+          .or('user_one.eq.${user.id},user_two.eq.${user.id}')
+          .order('updated_at', ascending: false);
 
-              // Form Inputs
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16.0),
-                  children: [
-                    // To Section
-                    TextField(
-                      controller: toController,
-                      decoration: const InputDecoration(
-                        labelText: 'Recipients',
-                        hintText: 'To',
-                        border: UnderlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+      if (!mounted) return;
+      setState(() {
+        _conversations = List<Map<String, dynamic>>.from(rows);
+        _isLoading = false;
+      });
+    } catch (error) {
+      debugPrint('Error loading conversations: $error');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
-                    // Subject Section
-                    TextField(
-                      controller: subjectController,
-                      decoration: const InputDecoration(
-                        labelText: 'Subject',
-                        border: UnderlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+  void _subscribeToConversations() {
+    _conversationChannel = _supabase
+        .channel('inbox-conversations')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'conversations',
+          callback: (_) => _loadConversations(),
+        )
+        .subscribe();
+  }
 
-                    // Message Body Section
-                    TextField(
-                      controller: bodyController,
-                      maxLines: null,
-                      minLines: 8,
-                      decoration: const InputDecoration(
-                        hintText: 'Compose email',
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+  @override
+  void dispose() {
+    if (_conversationChannel != null) {
+      _supabase.removeChannel(_conversationChannel!);
+    }
+    super.dispose();
+  }
 
-              // Bottom Action Bar
-              Divider(
-                height: 1,
-                color: isDark ? Colors.grey.shade700 : Colors.grey,
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Send Button
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: isDark
-                              ? Colors.grey.shade900
-                              : Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                        onPressed: () {
-                          // Append the new message to the messages list
-                          if (toController.text.isNotEmpty ||
-                              subjectController.text.isNotEmpty) {
-                            setState(() {
-                              _messages.add({
-                                "to": toController.text,
-                                "subject": subjectController.text,
-                                "body": bodyController.text,
-                              });
-                            });
-                          }
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "Send",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-
-                      // Discard Button
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  String _otherUserId(Map<String, dynamic> conversation, String userId) {
+    return conversation['user_one'] == userId
+        ? conversation['user_two'] as String
+        : conversation['user_one'] as String;
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = UserService.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Inbox')),
+        body: const Center(child: Text('Sign in to view your messages.')),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Inbox"),
-        actions: [
-          // Compose Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              onPressed: _openComposeMessage,
-              child: Icon(
-                Icons.add,
-                color: isDark ? Colors.grey.shade900 : Colors.white,
-                size: 30,
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 10),
-            // Scrollable Content Region
-            Expanded(
-              child: Scrollbar(
-                thumbVisibility: true,
-                thickness: 6.0,
-                radius: const Radius.circular(10),
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    final message = _messages[index];
-                    return Container(
+      appBar: AppBar(title: const Text('Inbox')),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadConversations,
+              child: _conversations.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 180),
+                        Center(child: Text('No conversations yet.')),
+                      ],
+                    )
+                  : ListView.separated(
                       padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.only(bottom: 16.0),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.grey.shade900
-                            : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.grey.shade500
-                              : Colors.grey.shade300,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            message["subject"]!.isEmpty
-                                ? "(No Subject)"
-                                : message["subject"]!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                      itemCount: _conversations.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final conversation = _conversations[index];
+                        final otherUserId = _otherUserId(conversation, user.id);
+
+                        return Card(
+                          child: ListTile(
+                            leading: const CircleAvatar(
+                              child: Icon(Icons.person),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "To: ${message["to"]!}",
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.grey.shade300
-                                  : Colors.grey,
-                              fontSize: 12,
+                            title: const Text(
+                              'Conversation',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
+                            subtitle: Text(
+                              'User: ${otherUserId.substring(0, 8)}…',
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChatPage(
+                                    conversationId:
+                                        conversation['id'] as String,
+                                    otherUserId: otherUserId,
+                                    productId:
+                                        conversation['product_id'] as String?,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            message["body"]!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
+                        );
+                      },
+                    ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

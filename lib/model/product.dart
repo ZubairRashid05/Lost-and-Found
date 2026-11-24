@@ -1,5 +1,6 @@
 // Class for the products
 class Product {
+  final String? id;
   // Product properties
   final String name;
   final String description;
@@ -9,23 +10,25 @@ class Product {
   final String location;
   final String imageUrl;
   final List<String> imageUrls;
+  final String? userId;
   final bool isFound;
 
   // Constructor for the product
   Product({
+    this.id,
     required this.name,
     required this.description,
     this.category = "n/a",
     this.subcategory = "n/a",
     this.username = "n/a",
     this.location = "n/a",
-    this.imageUrl = "lib/assets/images/images.jpeg",
+    this.imageUrl = "",
     List<String>? imageUrls,
+    this.userId,
     this.isFound = false,
   }) : imageUrls = (imageUrls != null && imageUrls.isNotEmpty)
-            ? imageUrls
-            : [imageUrl];
-
+           ? imageUrls
+           : [imageUrl];
 
   // factory Product.fromJson(Map<String, dynamic> json) {
   //   final rawUrls = json['imageUrls'] as List<dynamic>?;
@@ -34,7 +37,7 @@ class Product {
   //     urls = [json['imageUrl'] as String];
   //   }
   //   final primary = json['imageUrl'] as String? ??
-  //       (urls.isNotEmpty ? urls.first : "lib/assets/images/images.jpeg");
+  //       (urls.isNotEmpty ? urls.first : "");
   //
   //   return Product(
   //     name: json['name'] as String? ?? 'Unnamed item',

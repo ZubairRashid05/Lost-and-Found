@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/draft.dart';
+import 'package:lost_and_found/widgets/app_image.dart';
 
 // Draft widget to show the users drafts in the draft menu
 class DraftProductCard extends StatelessWidget {
@@ -30,7 +31,7 @@ class DraftProductCard extends StatelessWidget {
           width: 72,
           height: 72,
           child: hasImage
-              ? Image.file(File(draft.imagePath!), fit: BoxFit.cover)
+              ? AppImage(source: draft.imagePath!, fit: BoxFit.cover)
               : const ColoredBox(
                   color: Color(0xFFEAF5FA),
                   child: Icon(Icons.drafts_outlined, size: 32),

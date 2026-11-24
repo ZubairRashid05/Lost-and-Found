@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/widgets/app_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_found/model/draft.dart';
 import 'package:lost_and_found/pages/draft.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lost_and_found/services/user_service.dart';
+import 'package:lost_and_found/services/product_service.dart';
 
 // Form screen allowing users to create posts
 class Request extends StatefulWidget {
@@ -183,7 +186,7 @@ class _Request extends State<Request> {
     }
 
     // Insert all post details into Supabase
-    final userId = supabase.auth.currentUser?.id;
+    final userId = UserService.currentUser?.id;
     final Map<String, dynamic> postData = {
       'name': _postName,
       'description': _postDescription,
@@ -197,7 +200,7 @@ class _Request extends State<Request> {
       postData['user_id'] = userId;
     }
 
-    await supabase.from('products').insert(postData);
+    await ProductService.createProduct(postData);
   }
 
   // Validates form inputs, uploads photos, publishes post, and clears inputs.
@@ -489,8 +492,8 @@ class _Request extends State<Request> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: Image.file(
-                                      selectedImage!,
+                                    child: AppImage(
+                                      source: selectedImage!.path,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -536,8 +539,8 @@ class _Request extends State<Request> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: Image.file(
-                                      selectedImage2!,
+                                    child: AppImage(
+                                      source: selectedImage2!.path,
                                       fit: BoxFit.cover,
                                     ),
                                   ),

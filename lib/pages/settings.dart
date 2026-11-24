@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lost_and_found/services/user_service.dart';
 
 // Settings page to update user information
 class Settings extends StatefulWidget {
@@ -13,13 +13,13 @@ class _SettingsState extends State<Settings> {
   // Create the controllers for the text fields
   late final TextEditingController _usernameController;
   late final TextEditingController _emailController;
-  final user = Supabase.instance.client.auth.currentUser;
+  final user = UserService.currentUser;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    final userUsername = user?.userMetadata?['username'];
+    final userUsername = user?.username;
     final userEmail = user?.email;
     _usernameController = TextEditingController(text: userUsername);
     _emailController = TextEditingController(text: userEmail);
@@ -45,18 +45,7 @@ class _SettingsState extends State<Settings> {
     setState(() => _isLoading = true);
 
     try {
-      final supabase = Supabase.instance.client;
-
-      // Update the username in the users table
-      final res = await supabase.auth.updateUser(
-        UserAttributes(data: {'username': newUsername}),
-      );
-      if (res.user != null) {
-        await supabase
-            .from('users')
-            .update({'username': newUsername})
-            .eq('id', res.user!.id);
-      }
+      await UserService.updateUsername(newUsername);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +135,7 @@ class _SettingsState extends State<Settings> {
                               child: ElevatedButton(
                                 // logout button
                                 onPressed: () async {
-                                  await Supabase.instance.client.auth.signOut();
+                                  await UserService.signOut();
 
                                   if (!context.mounted) return;
 

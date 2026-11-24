@@ -5,6 +5,7 @@ import 'package:lost_and_found/pages/login.dart';
 import 'package:lost_and_found/widgets/navbar.dart';
 import 'package:lost_and_found/pages/draft.dart';
 import 'package:lost_and_found/pages/signup.dart';
+import 'package:lost_and_found/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // controller to manage dark and light mode
@@ -78,7 +79,7 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final session = Supabase.instance.client.auth.currentSession;
+    final session = UserService.currentSession;
     return session == null ? const LoginPage() : const NavBar();
   }
 }
