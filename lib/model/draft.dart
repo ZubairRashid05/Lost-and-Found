@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lost_and_found/services/user_service.dart';
 
 // Model for a draft request
 class RequestDraft {
@@ -62,7 +62,7 @@ class RequestDraft {
 class DraftStorage {
   // Storage key for the user's drafts
   static String get _userStorageKey {
-    final userId = Supabase.instance.client.auth.currentUser?.id ?? 'guest';
+    final userId = UserService.currentUser?.id ?? 'guest';
     return 'request_drafts_$userId';
   }
 

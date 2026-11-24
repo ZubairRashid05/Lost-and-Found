@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../services/user_service.dart' as user_service;
+
 // Login page for the app
 const authTitleStyle = TextStyle(
   fontSize: 30,
@@ -65,7 +67,7 @@ class AuthPrimaryButton extends StatelessWidget {
     required this.onPressed,
   });
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -97,6 +99,7 @@ class _SignupPageState extends State<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -110,7 +113,7 @@ class _SignupPageState extends State<SignupPage> {
   Future<void> _handleSignup() async {
     final username = _usernameController.text.trim();
     final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+    final password = _passwordController.text;
 
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,11 +122,13 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
+    setState(() => _isLoading = true);
+
     try {
-      final response = await Supabase.instance.client.auth.signUp(
+      final response = await user_service.UserService.createUser(
         email: email,
+        username: username,
         password: password,
-        data: {'username': username},
       );
 
       if (!mounted) return;
@@ -133,15 +138,13 @@ class _SignupPageState extends State<SignupPage> {
           '/homepage',
           (route) => false,
         );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created. Please verify your email.'),
+          ),
+        );
       }
-// else {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(
-      //       content: Text('Check your email to confirm your account.'),
-      //     ),
-      //   );
-      //   Navigator.pop(context);
-      // }
     } on AuthException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -152,6 +155,8 @@ class _SignupPageState extends State<SignupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not create account: $error')),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -201,7 +206,10 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               ),
               const SizedBox(height: 21),
-              AuthPrimaryButton(label: 'Continue', onPressed: _handleSignup),
+              AuthPrimaryButton(
+                label: _isLoading ? 'Creating account...' : 'Continue',
+                onPressed: _isLoading ? null : _handleSignup,
+              ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

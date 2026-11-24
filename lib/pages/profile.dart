@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lost_and_found/pages/settings.dart';
 import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/widgets/product_card.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lost_and_found/services/user_service.dart';
+import 'package:lost_and_found/services/product_service.dart';
 
 // User profile screen showing current user details and user-created posts.
 class Profile extends StatefulWidget {
@@ -10,37 +11,6 @@ class Profile extends StatefulWidget {
 
   @override
   State<Profile> createState() => _Profile();
-}
-
-// Fetch user's posts from Supabase
-Future<List<Product>> loadProducts() async {
-  final currentUser = Supabase.instance.client.auth.currentUser;
-  if (currentUser == null) return [];
-
-  final rows = await Supabase.instance.client
-      .from('products')
-      .select(
-        'name, description, category, subcategory, last_location, '
-        'image1_url, image2_url, user_name, is_found',
-      )
-      .eq('user_id', currentUser.id);
-
-  return (rows as List).map((row) {
-    final imageUrl = row['image1_url'] as String?;
-
-    return Product(
-      name: row['name'] as String? ?? 'Unnamed item',
-      description: row['description'] as String? ?? '',
-      category: row['category'] as String? ?? 'n/a',
-      subcategory: row['subcategory'] as String? ?? 'n/a',
-      username: row['user_name'] as String? ?? 'n/a',
-      location: row['last_location'] as String? ?? 'n/a',
-      imageUrl: imageUrl?.isNotEmpty == true
-          ? imageUrl!
-          : 'lib/assets/images/images.jpeg',
-      isFound: row['is_found'] as bool? ?? false,
-    );
-  }).toList();
 }
 
 class _Profile extends State<Profile> {
@@ -55,7 +25,7 @@ class _Profile extends State<Profile> {
 
   Future<void> loadData() async {
     try {
-      final loadedProducts = await loadProducts();
+      final loadedProducts = await ProductService.getCurrentUserProducts();
 
       if (mounted) {
         setState(() {
@@ -76,10 +46,11 @@ class _Profile extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currentUser = Supabase.instance.client.auth.currentUser;
+    final currentUser = UserService.currentUser;
     final userEmail = currentUser?.email ?? 'No email found';
-    final userUsername =
-        currentUser?.userMetadata?['username'] ?? 'No username found';
+    final userUsername = currentUser?.username.isNotEmpty == true
+        ? currentUser!.username
+        : 'No username found';
 
     return Scaffold(
       appBar: AppBar(title: const Text("Your Profile")),

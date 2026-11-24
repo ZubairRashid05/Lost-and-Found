@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lost_and_found/main.dart';
 import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/pages/settings.dart';
+import 'package:lost_and_found/services/product_service.dart';
+import 'package:lost_and_found/services/user_service.dart';
 import 'package:lost_and_found/widgets/product_card.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../widgets/product_pop_up.dart';
+import '../widgets/product_page.dart';
 
 // Main home screen displaying posts, location filters, and search bar.
 class Home extends StatefulWidget {
@@ -13,41 +14,6 @@ class Home extends StatefulWidget {
 
   @override
   State<Home> createState() => _HomeState();
-}
-
-// Asynchronously fetches all products
-Future<List<Product>> loadProducts() async {
-  // connect to supabase to grab all the products
-  final rows = await Supabase.instance.client
-      .from('products')
-      .select(
-        'name, description, category, subcategory, last_location, '
-        'image1_url, image2_url, user_name, is_found', // 1. Include column in select
-      )
-      .eq('is_found', false); // 2. Filter rows where is_found is false
-
-  return (rows as List).map((row) {
-    final img1 = row['image1_url'] as String?;
-    final img2 = row['image2_url'] as String?;
-
-    // Collect all valid image URLs
-    final List<String> urls = [];
-    if (img1 != null && img1.trim().isNotEmpty) urls.add(img1);
-    if (img2 != null && img2.trim().isNotEmpty) urls.add(img2);
-    if (urls.isEmpty) urls.add('lib/assets/images/images.jpeg');
-
-    return Product(
-      name: row['name'] as String? ?? 'Unnamed item',
-      description: row['description'] as String? ?? '',
-      category: row['category'] as String? ?? 'n/a',
-      subcategory: row['subcategory'] as String? ?? 'n/a',
-      username: row['user_name'] as String? ?? 'n/a',
-      location: row['last_location'] as String? ?? 'n/a',
-      imageUrl: urls.first,
-      imageUrls: urls,
-      isFound: row['is_found'] as bool? ?? false, // 3. Read value from row data
-    );
-  }).toList();
 }
 
 class _HomeState extends State<Home> {
@@ -81,7 +47,7 @@ class _HomeState extends State<Home> {
   // Load products and updates widget state.
   Future<void> _loadData() async {
     try {
-      final loadedProducts = await loadProducts();
+      final loadedProducts = await ProductService.getLostProducts();
       if (!mounted) return;
       setState(() {
         _allProducts = loadedProducts;
@@ -207,9 +173,11 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currentUser = Supabase.instance.client.auth.currentUser;
+    final currentUser = UserService.currentUser;
     final userEmail = currentUser?.email ?? 'Guest user';
-    final userUsername = currentUser?.userMetadata?['username'] ?? 'Guest';
+    final userUsername = currentUser?.username.isNotEmpty == true
+        ? currentUser!.username
+        : 'Guest';
 
     return Scaffold(
       appBar: AppBar(
@@ -335,7 +303,7 @@ class _HomeState extends State<Home> {
                 ),
                 onTap: () async {
                   Navigator.pop(context);
-                  await Supabase.instance.client.auth.signOut();
+                  await UserService.signOut();
                   if (!context.mounted) return;
                   Navigator.pushNamedAndRemoveUntil(
                     context,
@@ -470,9 +438,11 @@ class _HomeState extends State<Home> {
 
   // Displays the details for the selected product
   void showProductDetails(Product product) {
-    showDialog(
-      context: context,
-      builder: (context) => ProductPopUp(product: product),
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => ProductPage(product: product),
+      ),
     );
   }
 }

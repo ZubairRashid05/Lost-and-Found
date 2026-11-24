@@ -1,33 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/product.dart';
+import 'package:lost_and_found/pages/chat_page.dart';
+import 'package:lost_and_found/services/user_service.dart';
+import 'package:lost_and_found/widgets/app_image.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 // Display full item details
-class ProductPopUp extends StatefulWidget {
+class ProductPage extends StatefulWidget {
   final Product product;
 
-  const ProductPopUp({super.key, required this.product});
+  const ProductPage({super.key, required this.product});
 
   @override
-  State<ProductPopUp> createState() => _ProductPopUpState();
+  State<ProductPage> createState() => _ProductPageState();
 }
 
-class _ProductPopUpState extends State<ProductPopUp> {
+class _ProductPageState extends State<ProductPage> {
   // Current image index
   int _activePageIndex = 0;
 
-  // Opens full-screen image viewer
+  Future<void> _messageOwner() async {
+    final currentUser = UserService.currentUser;
+    final ownerId = widget.product.userId;
+    final productId = widget.product.id;
+
+    if (currentUser == null) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      Navigator.pushNamed(context, '/login');
+      return;
+    }
+
+    if (ownerId == null || productId == null) {
+      _showMessage('This product does not have an owner yet.');
+      return;
+    }
+
+    if (ownerId == currentUser.id) {
+      _showMessage('You cannot message yourself.');
+      return;
+    }
+
+    try {
+      if (!mounted) return;
+      await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChatPage(otherUserId: ownerId, productId: productId),
+        ),
+      );
+    } catch (error) {
+      _showMessage('Could not start conversation: $error');
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // Opens the built-in PhotoView gallery.
   void _openFullscreenViewer(
     BuildContext context,
     List<String> imageUrls,
     int initialIndex,
   ) {
-    final pageController = PageController(initialPage: initialIndex);
-
     showDialog(
       context: context,
       barrierColor: Colors.black,
       builder: (context) {
         int currentIndex = initialIndex;
+        final pageController = PageController(initialPage: initialIndex);
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
@@ -50,79 +95,28 @@ class _ProductPopUpState extends State<ProductPopUp> {
                 ),
               ),
               body: Stack(
-                alignment: Alignment.center,
                 children: [
-                  // Fullscreen PageView
-                  PageView.builder(
-                    controller: pageController,
+                  PhotoViewGallery.builder(
+                    pageController: pageController,
                     itemCount: imageUrls.length,
+                    backgroundDecoration: const BoxDecoration(
+                      color: Colors.black,
+                    ),
+                    scrollPhysics: const BouncingScrollPhysics(),
                     onPageChanged: (index) {
                       setDialogState(() {
                         currentIndex = index;
                       });
                     },
-                    itemBuilder: (context, index) {
+                    builder: (context, index) {
                       final url = imageUrls[index];
-                      final isNet = url.startsWith('http');
-
-                      return InteractiveViewer(
-                        minScale: 1.0,
-                        maxScale: 4.0,
-                        child: Center(
-                          child: isNet
-                              ? Image.network(
-                                  url,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stack) =>
-                                      _imageError(),
-                                )
-                              : Image.asset(
-                                  url,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stack) =>
-                                      _imageError(),
-                                ),
-                        ),
+                      return PhotoViewGalleryPageOptions(
+                        imageProvider: AppImage.providerFor(url),
+                        minScale: PhotoViewComputedScale.contained,
+                        maxScale: PhotoViewComputedScale.covered * 2.5,
                       );
                     },
                   ),
-                  // Navigation Arrows for Multiple Images
-                  if (imageUrls.length > 1) ...[
-                    if (currentIndex > 0)
-                      Positioned(
-                        left: 12,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white70,
-                            size: 28,
-                          ),
-                          onPressed: () {
-                            pageController.previousPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                        ),
-                      ),
-                    if (currentIndex < imageUrls.length - 1)
-                      Positioned(
-                        right: 12,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white70,
-                            size: 28,
-                          ),
-                          onPressed: () {
-                            pageController.nextPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                        ),
-                      ),
-                  ],
                 ],
               ),
             );
@@ -135,20 +129,15 @@ class _ProductPopUpState extends State<ProductPopUp> {
   @override
   Widget build(BuildContext context) {
     final imageUrls = widget.product.imageUrls;
-    final maxHeight = MediaQuery.of(context).size.height * 0.85;
+    // final maxHeight = MediaQuery.of(context).size.height * 0.85;
 
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
+    return Scaffold(
+      body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top Image Header
               SizedBox(
                 height: 280,
                 child: ClipRRect(
@@ -167,22 +156,6 @@ class _ProductPopUpState extends State<ProductPopUp> {
                         },
                         itemBuilder: (context, index) {
                           final url = imageUrls[index];
-                          final isNet = url.startsWith('http');
-
-                          Widget imageWidget = isNet
-                              ? Image.network(
-                                  url,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _imageError(),
-                                )
-                              : Image.asset(
-                                  url,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _imageError(),
-                                );
-
                           return GestureDetector(
                             onTap: () => _openFullscreenViewer(
                               context,
@@ -192,7 +165,7 @@ class _ProductPopUpState extends State<ProductPopUp> {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                imageWidget,
+                                AppImage(source: url, fit: BoxFit.cover),
                                 DecoratedBox(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
@@ -299,21 +272,13 @@ class _ProductPopUpState extends State<ProductPopUp> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Icon(Icons.chat_bubble_outline, size: 20),
+                              IconButton(
+                                onPressed: _messageOwner,
+                                icon: const Icon(Icons.chat_bubble_outline),
+                              ),
                             ],
                           ),
                         ),
-                        // const SizedBox(width: 8),
-                        // Chip(
-                        //   label: Text(
-                        //     widget.product.isFound ? "Found" : "Contact",
-                        //   ),
-                        //   backgroundColor: widget.product.isFound
-                        //       ? Colors.green.shade100
-                        //       : Colors.red.shade100,
-                        //   side: BorderSide.none,
-                        //   visualDensity: VisualDensity.compact,
-                        // ),
                       ],
                     ),
                     const Divider(height: 24),
@@ -372,6 +337,15 @@ class _ProductPopUpState extends State<ProductPopUp> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _messageOwner,
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: const Text('Message Owner'),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -381,16 +355,4 @@ class _ProductPopUpState extends State<ProductPopUp> {
       ),
     );
   }
-}
-
-// Placeholder error icon displayed when an image URL fails to load.
-Widget _imageError() {
-  return Container(
-    color: Colors.deepPurple.shade100,
-    child: const Icon(
-      Icons.image_not_supported,
-      size: 50,
-      color: Colors.deepPurple,
-    ),
-  );
 }

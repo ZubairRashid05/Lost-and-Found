@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/model/product.dart';
+import 'package:lost_and_found/widgets/app_image.dart';
 
 // Product grid card displaying a products information
 class ProductCard extends StatelessWidget {
@@ -9,8 +10,6 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isNetworkImage = product.imageUrl.startsWith('http');
-
     return Container(
       height: 200,
       width: double.infinity,
@@ -31,23 +30,7 @@ class ProductCard extends StatelessWidget {
         child: Stack(
           children: [
             // Background Image
-            Positioned.fill(
-              child: isNetworkImage
-                  ? Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _imageError();
-                      },
-                    )
-                  : Image.asset(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _imageError();
-                      },
-                    ),
-            ),
+            Positioned.fill(child: AppImage(source: product.imageUrl)),
             // Gradient for Text Readability
             Positioned.fill(
               child: DecoratedBox(
@@ -151,18 +134,6 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // Placeholder if image fails to load
-  Widget _imageError() {
-    return Container(
-      color: Colors.deepPurple.shade100,
-      child: const Icon(
-        Icons.image_not_supported,
-        size: 50,
-        color: Colors.deepPurple,
       ),
     );
   }
