@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_found/model/user.dart';
 import 'package:lost_and_found/services/user_service.dart';
+import 'package:lost_and_found/widgets/text_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatPage extends StatefulWidget {
@@ -83,26 +87,46 @@ class _ChatPageState extends State<ChatPage> {
     return created['id'] as String;
   }
 
-  Future<void> _sendMessage() async {
+  Future<String> _uploadChatImage(File image, String conversationId) async {
+    final user = UserService.currentUser;
+    if (user == null) {
+      throw StateError('You must be signed in to send images.');
+    }
+
+    final extension = image.path.split('.').last.toLowerCase();
+    final fileName = '${DateTime.now().microsecondsSinceEpoch}.$extension';
+    final path = 'chat/$conversationId/${user.id}/$fileName';
+
+    // Reuse the app's existing public image bucket.
+    await _supabase.storage.from('post_images').upload(path, image);
+    return _supabase.storage.from('post_images').getPublicUrl(path);
+  }
+
+  Future<String> _getOrCreateConversation(String currentUserId) async {
+    if (_conversationId != null) return _conversationId!;
+
+    final conversationId = await _createConversation(currentUserId);
+    _conversationId = conversationId;
+    return conversationId;
+  }
+
+  Future<void> _sendMessage({String? imageUrl}) async {
     final text = _messageController.text.trim();
     final user = UserService.currentUser;
-    if (text.isEmpty || user == null || _isSending) return;
+    if ((text.isEmpty && imageUrl == null) || user == null || _isSending) {
+      return;
+    }
 
     setState(() => _isSending = true);
 
     try {
-      var conversationId = _conversationId;
-
-      // A conversation is created only when the first message is sent.
-      if (conversationId == null) {
-        conversationId = await _createConversation(user.id);
-        _conversationId = conversationId;
-      }
+      final conversationId = await _getOrCreateConversation(user.id);
 
       await _supabase.from('messages').insert({
         'conversation_id': conversationId,
         'sender_id': user.id,
         'body': text,
+        'image_url': imageUrl,
       });
 
       await _supabase
@@ -117,6 +141,48 @@ class _ChatPageState extends State<ChatPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Could not send message: $error')));
+    } finally {
+      if (mounted) setState(() => _isSending = false);
+    }
+  }
+
+  Future<void> _pickAndSendImage() async {
+    if (_isSending) return;
+
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (image == null || !mounted) return;
+
+    setState(() => _isSending = true);
+
+    try {
+      final user = UserService.currentUser;
+      if (user == null) {
+        throw StateError('You must be signed in to send images.');
+      }
+
+      final conversationId = await _getOrCreateConversation(user.id);
+      final imageUrl = await _uploadChatImage(File(image.path), conversationId);
+
+      await _supabase.from('messages').insert({
+        'conversation_id': conversationId,
+        'sender_id': user.id,
+        'body': '',
+        'image_url': imageUrl,
+      });
+
+      await _supabase
+          .from('conversations')
+          .update({'updated_at': DateTime.now().toIso8601String()})
+          .eq('id', conversationId);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not send image: $error')));
     } finally {
       if (mounted) setState(() => _isSending = false);
     }
@@ -199,13 +265,10 @@ class _ChatPageState extends State<ChatPage> {
                                           .surfaceContainer,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: Text(
-                                message['body'] as String? ?? '',
-                                style: TextStyle(
-                                  color: isMine
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : null,
-                                ),
+                              child: TextMessage(
+                                body: message['body'] as String? ?? '',
+                                imageUrl: message['image_url'] as String?,
+                                isMine: isMine,
                               ),
                             ),
                           );
@@ -219,6 +282,12 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
               child: Row(
                 children: [
+                  IconButton(
+                    onPressed: _isSending ? null : _pickAndSendImage,
+                    tooltip: 'Send image',
+                    icon: const Icon(Icons.image_outlined),
+                  ),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: TextField(
                       controller: _messageController,

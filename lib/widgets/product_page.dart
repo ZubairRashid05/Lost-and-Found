@@ -129,12 +129,12 @@ class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     final imageUrls = widget.product.imageUrls;
-    // final maxHeight = MediaQuery.of(context).size.height * 0.85;
 
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
