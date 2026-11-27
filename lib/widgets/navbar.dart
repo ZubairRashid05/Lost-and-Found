@@ -37,7 +37,9 @@ class _NavBar extends State<NavBar> {
 
     return Scaffold(
       extendBody: true,
-      body: _pages[_selectedPage],
+      // Keep each tab mounted so returning to Home does not recreate it or
+      // fetch the products again. Home still refreshes through pull-to-refresh.
+      body: IndexedStack(index: _selectedPage, children: _pages),
       bottomNavigationBar: SafeArea(
         child: Container(
           margin: const EdgeInsets.all(10),

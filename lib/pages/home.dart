@@ -25,6 +25,9 @@ class _HomeState extends State<Home> {
   int _crossAxisCount = 2;
   String _searchQuery = '';
   String _selectedLocation = 'All';
+  String _selectedCategory = 'All';
+  String _selectedSubcategory = 'All';
+  bool _isLoading = false;
 
   final List<String> _locations = [
     'All',
@@ -38,6 +41,16 @@ class _HomeState extends State<Home> {
     'Recreation Centre',
   ];
 
+  final Map<String, List<String>> _subcategories = {
+    'All': ['All'],
+    'Electronics': ['All', 'Phone', 'Laptop', 'Headphones', 'Other'],
+    'Clothing': ['All', 'Shirt', 'Jacket', 'Pants', 'Shoes', 'Other'],
+    'Accessories': ['All', 'Wallet', 'Keys', 'Watch', 'Other'],
+    'Jewellery': ['All', 'Necklace', 'Ring', 'Bracelet', 'Other'],
+    'Student Essentials': ['All', 'Textbooks', 'Notebooks', 'Other'],
+    'Other': ['All', 'Other'],
+  };
+
   @override
   void initState() {
     super.initState();
@@ -46,38 +59,60 @@ class _HomeState extends State<Home> {
 
   // Load products and updates widget state.
   Future<void> _loadData() async {
+    if (_isLoading) return;
+
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
+
     try {
       final loadedProducts = await ProductService.getLostProducts();
       if (!mounted) return;
       setState(() {
         _allProducts = loadedProducts;
-        _applyFilter();
       });
+      _applyFilter();
     } catch (e) {
       debugPrint("Error loading data: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   // Filters products
   void _applyFilter() {
-    setState(() {
-      _filteredProducts = _allProducts.where((product) {
-        final matchesQuery =
-            _searchQuery.isEmpty ||
-            product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            product.description.toLowerCase().contains(
-              _searchQuery.toLowerCase(),
-            );
+    final query = _searchQuery.toLowerCase();
+    final filteredProducts = _allProducts.where((product) {
+      final matchesQuery =
+          query.isEmpty ||
+          product.name.toLowerCase().contains(query) ||
+          product.description.toLowerCase().contains(query);
 
-        final matchesLocation =
-            _selectedLocation == 'All' ||
-            product.location.toLowerCase().contains(
-              _selectedLocation.toLowerCase(),
-            );
+      final matchesLocation =
+          _selectedLocation == 'All' ||
+          product.location.toLowerCase().contains(
+            _selectedLocation.toLowerCase(),
+          );
 
-        return matchesQuery && matchesLocation;
-      }).toList();
-    });
+      final matchesCategory =
+          _selectedCategory == 'All' ||
+          product.category.toLowerCase() == _selectedCategory.toLowerCase();
+
+      final matchesSubcategory =
+          _selectedSubcategory == 'All' ||
+          product.subcategory.toLowerCase() ==
+              _selectedSubcategory.toLowerCase();
+
+      return matchesQuery &&
+          matchesLocation &&
+          matchesCategory &&
+          matchesSubcategory;
+    }).toList();
+
+    if (!mounted) return;
+    setState(() => _filteredProducts = filteredProducts);
   }
 
   // Change grid view layout
@@ -85,6 +120,129 @@ class _HomeState extends State<Home> {
     setState(() {
       _crossAxisCount = (_crossAxisCount % 3) + 1;
     });
+  }
+
+  Future<void> _showFilterDialog() async {
+    var temporaryLocation = _selectedLocation;
+    var temporaryCategory = _selectedCategory;
+    var temporarySubcategory = _selectedSubcategory;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final subcategories =
+                _subcategories[temporaryCategory] ?? const ['All'];
+
+            return AlertDialog(
+              title: const Text('Filter products'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: temporaryLocation,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Location',
+                        prefixIcon: Icon(Icons.location_on_outlined),
+                      ),
+                      items: _locations
+                          .map(
+                            (location) => DropdownMenuItem(
+                              value: location,
+                              child: Text(location),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() => temporaryLocation = value);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      initialValue: temporaryCategory,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Category',
+                        prefixIcon: Icon(Icons.category_outlined),
+                      ),
+                      items: _subcategories.keys
+                          .map(
+                            (category) => DropdownMenuItem(
+                              value: category,
+                              child: Text(category),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() {
+                          temporaryCategory = value;
+                          temporarySubcategory = 'All';
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      key: ValueKey(temporaryCategory),
+                      initialValue: subcategories.contains(temporarySubcategory)
+                          ? temporarySubcategory
+                          : 'All',
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Subcategory',
+                        prefixIcon: Icon(Icons.label_outline),
+                      ),
+                      items: subcategories
+                          .map(
+                            (subcategory) => DropdownMenuItem(
+                              value: subcategory,
+                              child: Text(subcategory),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() => temporarySubcategory = value);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedLocation = 'All';
+                      _selectedCategory = 'All';
+                      _selectedSubcategory = 'All';
+                    });
+                    _applyFilter();
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('Clear'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedLocation = temporaryLocation;
+                      _selectedCategory = temporaryCategory;
+                      _selectedSubcategory = temporarySubcategory;
+                    });
+                    _applyFilter();
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('Apply'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   // Displays dialog with contact details and office location
@@ -317,120 +475,125 @@ class _HomeState extends State<Home> {
         ),
       ),
 
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Search Input Field
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                onChanged: (value) {
-                  _searchQuery = value;
-                  _applyFilter();
-                },
-                decoration: InputDecoration(
-                  hintText: "Search items, e.g., keys, wallet...",
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: isDark
-                      ? Colors.grey.shade900
-                      : Colors.grey.shade100,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search and product filters in one row
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        onChanged: (value) {
+                          _searchQuery = value;
+                          _applyFilter();
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Search items...",
+                          prefixIcon: const Icon(Icons.search),
+                          filled: true,
+                          fillColor: isDark
+                              ? Colors.grey.shade900
+                              : Colors.blueGrey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton(
+                      onPressed: _showFilterDialog,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Icon(
+                        size: 30,
+                        _selectedLocation == 'All' &&
+                                _selectedCategory == 'All' &&
+                                _selectedSubcategory == 'All'
+                            ? Icons.filter_list_off
+                            : Icons.filter_list_outlined,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            // Location Filter Chips
-            SizedBox(
-              height: 48,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: _locations.length,
-                itemBuilder: (context, index) {
-                  final loc = _locations[index];
-                  final isSelected = _selectedLocation == loc;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: FilterChip(
-                      selected: isSelected,
-                      label: Text(loc),
-                      selectedColor: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedLocation = loc;
-                          _applyFilter();
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Products Grid
-            SafeArea(
-              child: _filteredProducts.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(40.0),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.search_off_rounded,
-                              size: 60,
-                              color: isDark
-                                  ? Colors.white38
-                                  : Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              "No matching items found",
-                              style: TextStyle(
-                                fontSize: 16,
+              // Products Grid
+              SafeArea(
+                child: _isLoading && _allProducts.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(40),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    : _filteredProducts.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.search_off_rounded,
+                                size: 60,
                                 color: isDark
-                                    ? Colors.white70
-                                    : Colors.grey.shade600,
+                                    ? Colors.white38
+                                    : Colors.grey.shade400,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+                              Text(
+                                "No matching items found",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _filteredProducts.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: _crossAxisCount,
+                                crossAxisSpacing: 12.0,
+                                mainAxisSpacing: 12.0,
+                                childAspectRatio: _crossAxisCount == 1
+                                    ? 2.1
+                                    : (_crossAxisCount == 2 ? 0.78 : 0.65),
+                              ),
+                          itemBuilder: (context, index) {
+                            final product = _filteredProducts[index];
+                            return GestureDetector(
+                              onTap: () => showProductDetails(product),
+                              child: ProductCard(product: product),
+                            );
+                          },
                         ),
                       ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _filteredProducts.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _crossAxisCount,
-                          crossAxisSpacing: 12.0,
-                          mainAxisSpacing: 12.0,
-                          childAspectRatio: _crossAxisCount == 1
-                              ? 2.1
-                              : (_crossAxisCount == 2 ? 0.78 : 0.65),
-                        ),
-                        itemBuilder: (context, index) {
-                          final product = _filteredProducts[index];
-                          return GestureDetector(
-                            onTap: () => showProductDetails(product),
-                            child: ProductCard(product: product),
-                          );
-                        },
-                      ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

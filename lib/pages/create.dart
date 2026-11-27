@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lost_and_found/widgets/app_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_found/model/draft.dart';
+import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/pages/draft.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lost_and_found/services/user_service.dart';
@@ -11,7 +12,9 @@ import 'package:lost_and_found/services/product_service.dart';
 
 // Form screen allowing users to create posts
 class Request extends StatefulWidget {
-  const Request({super.key});
+  final Product? productToEdit;
+
+  const Request({super.key, this.productToEdit});
 
   @override
   State<Request> createState() => _Request();
@@ -25,13 +28,13 @@ class _Request extends State<Request> {
   final _descriptionController = TextEditingController();
 
   bool _isLoading = false;
-  String? _postName;
-  String? _postDescription;
   String? _selectedCategory;
   String? _selectedSubcategory;
   String? _selectedLocation;
   File? selectedImage;
   File? selectedImage2;
+  String? selectedImageUrl;
+  String? selectedImageUrl2;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -58,6 +61,37 @@ class _Request extends State<Request> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadProductForEditing();
+  }
+
+  void _loadProductForEditing() {
+    final product = widget.productToEdit;
+    if (product == null) return;
+
+    _nameController.text = product.name;
+    _descriptionController.text = product.description;
+    _selectedCategory = categories.containsKey(product.category)
+        ? product.category
+        : null;
+    _selectedSubcategory =
+        _selectedCategory != null &&
+            categories[_selectedCategory]!.contains(product.subcategory)
+        ? product.subcategory
+        : null;
+    _selectedLocation = locations.contains(product.location)
+        ? product.location
+        : null;
+
+    final imageUrls = product.imageUrls
+        .where((url) => url.trim().isNotEmpty)
+        .toList();
+    selectedImageUrl = imageUrls.isNotEmpty ? imageUrls[0] : null;
+    selectedImageUrl2 = imageUrls.length > 1 ? imageUrls[1] : null;
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
@@ -74,6 +108,8 @@ class _Request extends State<Request> {
       _selectedLocation = null;
       selectedImage = null;
       selectedImage2 = null;
+      selectedImageUrl = null;
+      selectedImageUrl2 = null;
     });
     _formKey.currentState?.reset();
   }
@@ -152,8 +188,10 @@ class _Request extends State<Request> {
       setState(() {
         if (isSecond) {
           selectedImage2 = File(image.path);
+          selectedImageUrl2 = null;
         } else {
           selectedImage = File(image.path);
+          selectedImageUrl = null;
         }
       });
     }
@@ -179,28 +217,36 @@ class _Request extends State<Request> {
 
     if (selectedImage != null) {
       image1Url = await uploadImage(selectedImage!);
+    } else {
+      image1Url = selectedImageUrl;
     }
 
     if (selectedImage2 != null) {
       image2Url = await uploadImage(selectedImage2!);
+    } else {
+      image2Url = selectedImageUrl2;
     }
 
     // Insert all post details into Supabase
     final userId = UserService.currentUser?.id;
     final Map<String, dynamic> postData = {
-      'name': _postName,
-      'description': _postDescription,
+      'name': _nameController.text.trim(),
+      'description': _descriptionController.text.trim(),
       'category': _selectedCategory,
       'subcategory': _selectedSubcategory,
       'last_location': _selectedLocation,
       'image1_url': image1Url,
       'image2_url': image2Url,
     };
-    if (userId != null) {
+    if (widget.productToEdit == null && userId != null) {
       postData['user_id'] = userId;
     }
 
-    await ProductService.createProduct(postData);
+    if (widget.productToEdit != null && widget.productToEdit!.id != null) {
+      await ProductService.updateProduct(widget.productToEdit!.id!, postData);
+    } else {
+      await ProductService.createProduct(postData);
+    }
   }
 
   // Validates form inputs, uploads photos, publishes post, and clears inputs.
@@ -219,10 +265,20 @@ class _Request extends State<Request> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post created successfully!')),
+        SnackBar(
+          content: Text(
+            widget.productToEdit == null
+                ? 'Post created successfully!'
+                : 'Post updated successfully!',
+          ),
+        ),
       );
 
-      _clearForm();
+      if (widget.productToEdit == null) {
+        _clearForm();
+      } else {
+        Navigator.pop(context, true);
+      }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -240,7 +296,7 @@ class _Request extends State<Request> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create Post"),
+        title: Text(widget.productToEdit == null ? "Create Post" : "Edit Post"),
         actions: [
           // Save Draft
           IconButton(
@@ -287,9 +343,6 @@ class _Request extends State<Request> {
                       return null;
                     },
                     maxLength: 30,
-                    onSaved: (value) {
-                      _postName = value;
-                    },
                   ),
                 ),
 
@@ -316,9 +369,6 @@ class _Request extends State<Request> {
                         return 'Please be more descriptive';
                       }
                       return null;
-                    },
-                    onSaved: (value) {
-                      _postDescription = value;
                     },
                   ),
                 ),
@@ -455,7 +505,7 @@ class _Request extends State<Request> {
                   children: [
                     // First Image
                     Expanded(
-                      child: selectedImage == null
+                      child: selectedImage == null && selectedImageUrl == null
                           ? InkWell(
                               onTap: () => pickImage(isSecond: false),
                               child: Container(
@@ -493,7 +543,9 @@ class _Request extends State<Request> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: AppImage(
-                                      source: selectedImage!.path,
+                                      source:
+                                          selectedImage?.path ??
+                                          selectedImageUrl!,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -514,7 +566,7 @@ class _Request extends State<Request> {
                                       onPressed: () {
                                         setState(() {
                                           selectedImage = null;
-                                          selectedImage2 = null;
+                                          selectedImageUrl = null;
                                         });
                                       },
                                     ),
@@ -527,7 +579,7 @@ class _Request extends State<Request> {
 
                     // Second Image
                     Expanded(
-                      child: selectedImage2 != null
+                      child: selectedImage2 != null || selectedImageUrl2 != null
                           ? Stack(
                               children: [
                                 Container(
@@ -540,7 +592,9 @@ class _Request extends State<Request> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: AppImage(
-                                      source: selectedImage2!.path,
+                                      source:
+                                          selectedImage2?.path ??
+                                          selectedImageUrl2!,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -561,6 +615,7 @@ class _Request extends State<Request> {
                                       onPressed: () {
                                         setState(() {
                                           selectedImage2 = null;
+                                          selectedImageUrl2 = null;
                                         });
                                       },
                                     ),
@@ -569,11 +624,17 @@ class _Request extends State<Request> {
                               ],
                             )
                           : InkWell(
-                              onTap: selectedImage != null
+                              onTap:
+                                  selectedImage != null ||
+                                      selectedImageUrl != null
                                   ? () => pickImage(isSecond: true)
                                   : null,
                               child: Opacity(
-                                opacity: selectedImage != null ? 1.0 : 0.4,
+                                opacity:
+                                    selectedImage != null ||
+                                        selectedImageUrl != null
+                                    ? 1.0
+                                    : 0.4,
                                 child: Container(
                                   height: 150,
                                   decoration: BoxDecoration(
@@ -622,7 +683,7 @@ class _Request extends State<Request> {
                               ),
                             )
                           : const Text(
-                              "Create Post",
+                              "Publish",
                               style: TextStyle(color: Colors.white),
                             ),
                     ),

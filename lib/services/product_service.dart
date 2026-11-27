@@ -34,6 +34,29 @@ class ProductService {
     await _supabase.from('products').insert(product);
   }
 
+  static Future<void> updateProduct(
+    String productId,
+    Map<String, dynamic> product,
+  ) async {
+    final user = UserService.currentUser;
+    if (user == null) {
+      throw StateError('You must be signed in to update a product.');
+    }
+
+    final updatedRows = await _supabase
+        .from('products')
+        .update(product)
+        .eq('id', productId)
+        .eq('user_id', user.id)
+        .select('id');
+
+    if (updatedRows.isEmpty) {
+      throw StateError(
+        'The product was not updated. Check the products update policy.',
+      );
+    }
+  }
+
   static Product _fromMap(Map<String, dynamic> row) {
     final imageUrls = [
       if ((row['image1_url'] as String?)?.trim().isNotEmpty == true)
