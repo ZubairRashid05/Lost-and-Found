@@ -4,6 +4,7 @@ import 'package:lost_and_found/model/product.dart';
 import 'package:lost_and_found/widgets/product_card.dart';
 import 'package:lost_and_found/services/user_service.dart';
 import 'package:lost_and_found/services/product_service.dart';
+import 'package:lost_and_found/pages/create.dart';
 
 // User profile screen showing current user details and user-created posts.
 class Profile extends StatefulWidget {
@@ -154,12 +155,19 @@ class _Profile extends State<Profile> {
                                 top: 8,
                                 right: 8,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    const snackBar = SnackBar(
-                                      content: Text('Pressed edit'),
-                                    );
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(snackBar);
+                                  onPressed: () async {
+                                    final didUpdate =
+                                        await Navigator.push<bool>(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                Request(productToEdit: x),
+                                          ),
+                                        );
+
+                                    if (didUpdate == true && mounted) {
+                                      await loadData();
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green,
